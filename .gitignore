@@ -1,0 +1,13 @@
+# Ignore binaries
+tmp/
+bin/
+
+# Ignoring environment variables
+.env
+config.toml
+
+# Ignoring PEM files
+*.pem
+
+# Added by goreleased init:
+dist/
