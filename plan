@@ -1,0 +1,57 @@
+User {
+	GithubUsername
+	FullName
+	Email (college email)
+	ProviderId
+	PhoneNumber
+	Bounties
+}
+
+Project {
+	Id
+	ProjectName
+	ProjectDesc
+	TechStack
+	MaintainersUsername
+	CreatedAt	
+}
+
+Issues {
+	Id
+	ProjectId
+	IssueUrl
+	isAssigned
+	isCompleted
+	Bounty
+	Tech
+	Difficulty
+}
+
+IssueUserRelationship {
+	Id
+	IssueId		
+	GithubUsername
+}
+
+Solution {
+	Id
+	ProjectId
+	PullRequestUrl
+	GithubUsername
+}
+
+Bounty {
+	Id
+	SolutionId
+	AwardedTo (Participant's Github Username)	
+	AwardedBy (Maintainer's Github Username)	
+	Amount
+	CreatedOn
+	UpdatedOn
+}
+
+---
+# Graphical Visualization
+1. PR, Issue count (for entire repo)
+2. Pie Chart (individual contributors)
+3. Issue distribution (for individuals) -> Bugs Reported, Docs, Code contirb, Feature suggestions
