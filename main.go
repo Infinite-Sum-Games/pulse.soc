@@ -126,8 +126,6 @@ func Routes(engine *gin.RouterGroup) {
 	engine.POST("/user/login", mw.VerifyCsrf, c.LoginUser)
 	engine.GET("/user/register", c.RegisterUserAccountCsrf)
 	engine.POST("/user/register", mw.VerifyCsrf, c.RegisterUserAccount)
-	engine.GET("/user/register", c.RegisterUserAccountCsrf)
-	engine.POST("/user/register", mw.VerifyCsrf, c.RegisterUserAccount)
 	engine.GET("/user/register/otp/resend", c.ResendUserOtpCsrf)
 	engine.POST("/user/register/otp/resend", mw.VerifyCsrf, c.ResendUserOtp)
 	engine.GET("/user/session", mw.Auth, c.UserSession)
