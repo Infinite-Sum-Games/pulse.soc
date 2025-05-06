@@ -9,8 +9,9 @@ config.toml
 # Ignoring generated files
 db/gen
 
-# Ignoring PEM files
-*.pem
+# Ignoring RSA and log files
+*.log
+*.rsa
 
 # Added by goreleased init:
 dist/

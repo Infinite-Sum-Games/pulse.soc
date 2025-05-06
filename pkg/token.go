@@ -9,9 +9,9 @@ import (
 
 	"aidanwoods.dev/go-paseto"
 	"github.com/IAmRiteshKoushik/pulse/cmd"
-	db "github.com/IAmRiteshKoushik/pulse/db/gen"
+	// db "github.com/IAmRiteshKoushik/pulse/db/gen"
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgtype"
+	// "github.com/jackc/pgx/v5/pgtype"
 )
 
 /*
@@ -180,30 +180,30 @@ func CheckForRefreshToken(refreshToken string) (*paseto.Token, error) {
 	}
 	defer conn.Release()
 
-	q := db.New()
+	// q := db.New()
 
-	token, err := q.CheckRefreshTokenQuery(ctx, conn, db.CheckRefreshTokenQueryParams{
-		Email: "",
-		RefreshToken: pgtype.Text{
-			String: refreshToken,
-			Valid:  true,
-		},
-	})
+	// token, err := q.CheckRefreshTokenQuery(ctx, conn, db.CheckRefreshTokenQueryParams{
+	// 	Email: "",
+	// 	RefreshToken: pgtype.Text{
+	// 		String: refreshToken,
+	// 		Valid:  true,
+	// 	},
+	// })
 	// Possible scenarios
 	// 1. RefreshToken does not exist
 	// 2. RefreshToken has become invalid
 	// 3. RefreshToken is perfect and it can generate AuthToken
-	if err != nil {
-		cmd.Log.Fatal("[AUTH-ERROR] Failed to fetch refresh token from DB", err)
-		return nil, err
-	}
-	if token.String == "" {
-		return nil, fmt.Errorf("[AUTH-ERROR] Refresh token not available.")
-	}
+	// if err != nil {
+	// 	cmd.Log.Fatal("[AUTH-ERROR] Failed to fetch refresh token from DB", err)
+	// 	return nil, err
+	// }
+	// if token.String == "" {
+	// 	return nil, fmt.Errorf("[AUTH-ERROR] Refresh token not available.")
+	// }
 
-	ok, validToken := ParseToken(token.String, "refresh_token")
-	if ok != true {
-		return nil, fmt.Errorf("[AUTH-ERROR]")
-	}
-	return validToken, nil
+	// ok, validToken := ParseToken(token.String, "refresh_token")
+	// if ok != true {
+	// 	return nil, fmt.Errorf("[AUTH-ERROR]")
+	// }
+	return &paseto.Token{}, nil
 }

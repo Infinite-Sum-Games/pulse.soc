@@ -1,0 +1,17 @@
+version: "3.7"
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: pulse-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+    ports:
+      - "5432:5432"
+    restart: on-failure
+    volumes:
+      - pulse_db_data:/var/lib/postgresql/data
+
+volumes:
+  pulse_db_data:
