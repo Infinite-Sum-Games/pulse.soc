@@ -1,0 +1,11 @@
+meta {
+  name: LoginUser
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/auth/user/login
+  body: json
+  auth: none
+}

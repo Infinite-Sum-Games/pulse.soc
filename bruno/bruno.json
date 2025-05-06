@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "pulse",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

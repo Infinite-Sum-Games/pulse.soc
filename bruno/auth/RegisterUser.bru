@@ -1,0 +1,11 @@
+meta {
+  name: RegisterUser
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/auth/user/register
+  body: json
+  auth: none
+}
