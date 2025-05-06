@@ -6,6 +6,9 @@ bin/
 .env
 config.toml
 
+# Ignoring generated files
+db/gen
+
 # Ignoring PEM files
 *.pem
 
