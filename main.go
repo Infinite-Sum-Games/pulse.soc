@@ -45,9 +45,9 @@ func StartApp() {
 	cmd.Log.Info("[OK]: All Regular Expressions created successfully.")
 
 	// Setup RSA (if not exists) + Initialize PASETO
-	err = cmd.CheckRSAKeyPairExists()
+	err = pkg.CheckRSAKeyPairExists()
 	if err != nil {
-		err = cmd.GenerateRSAKeyPair()
+		err = pkg.GenerateRSAKeyPair()
 		if err != nil {
 			panic(fmt.Errorf(failMsg, err))
 		}
@@ -55,7 +55,7 @@ func StartApp() {
 	} else {
 		cmd.Log.Info("[OK]: Using existing RSA keypair.")
 	}
-	err = cmd.InitPaseto()
+	err = pkg.InitPaseto()
 	if err != nil {
 		panic(fmt.Errorf(failMsg, err))
 	}

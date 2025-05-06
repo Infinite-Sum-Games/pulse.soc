@@ -2,14 +2,16 @@ package cmd
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"time"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func DBConfig(dbConnString string) *pgxpool.Config {
+var DBPool *pgxpool.Pool
+
+func InitDB() (*pgxpool.Pool, error) {
+
 	const defaultMaxConns = int32(4)
 	const defaultMinConns = int32(0)
 	const defaultMaxConnLifetime = time.Hour
@@ -17,11 +19,11 @@ func DBConfig(dbConnString string) *pgxpool.Config {
 	const defaultHealthCheckPeriod = time.Minute
 	const defaultConnectTimeout = time.Second * 5
 
-	var DATABASE_URL string = dbConnString
+	connStr := EnvVars.DBUrl
 
-	dbConfig, err := pgxpool.ParseConfig(DATABASE_URL)
+	dbConfig, err := pgxpool.ParseConfig(connStr)
 	if err != nil {
-		log.Fatal("Failed to create a config, error: ", err)
+		return nil, fmt.Errorf("Failed to parse connection string: %w", err)
 	}
 
 	dbConfig.MaxConns = defaultMaxConns
@@ -31,17 +33,22 @@ func DBConfig(dbConnString string) *pgxpool.Config {
 	dbConfig.HealthCheckPeriod = defaultHealthCheckPeriod
 	dbConfig.ConnConfig.ConnectTimeout = defaultConnectTimeout
 
-	dbConfig.BeforeAcquire = func(ctx context.Context, c *pgx.Conn) bool {
-		log.Println("Before acquiring the connection pool to the database!!")
-		return true
-	}
-	dbConfig.AfterRelease = func(c *pgx.Conn) bool {
-		log.Println("After releasing the connection pool to the database!!")
-		return true
-	}
-	dbConfig.BeforeClose = func(c *pgx.Conn) {
-		log.Println("Closed connection pool to the database!!")
+	pool, err := pgxpool.NewWithConfig(context.Background(), dbConfig)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to create connection pool: %w", err)
 	}
 
-	return dbConfig
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	conn, err := pool.Acquire(ctx) // Acquire a connection to test
+	if err != nil {
+		return nil, fmt.Errorf("Failed to acquire connection from pool: %w", err)
+	}
+	defer conn.Release()
+
+	if err := conn.Ping(ctx); err != nil {
+		return nil, fmt.Errorf("Database connection test failed: %w", err)
+	}
+	return pool, nil
 }

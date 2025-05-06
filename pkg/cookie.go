@@ -97,11 +97,11 @@ func RevokeRefreshToken(email string) {
 	defer tx.Rollback(ctx)
 
 	q := db.New()
-	result, err := q.RevokeRefreshTokenQuery(ctx, tx, email)
-	if err != nil || result.String != "" {
-		cmd.Log.Fatal("[AUTH-ERROR] Failed to Revoke Refresh Token in DB", err)
-		return
-	}
+	_, err = q.SampleQuery(ctx, tx)
+	// if err != nil || result.String != "" {
+	// 	cmd.Log.Fatal("[AUTH-ERROR] Failed to Revoke Refresh Token in DB", err)
+	// 	return
+	// }
 
 	if err := tx.Commit(ctx); err != nil {
 		cmd.Log.Fatal("[AUTH-ERROR] Failed to Revoke Refresh Token in DB", err)
