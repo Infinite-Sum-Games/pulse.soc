@@ -7,9 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
 	cmd "github.com/IAmRiteshKoushik/pulse/cmd"
@@ -44,31 +42,12 @@ func StartApp() {
 	}
 	cmd.Log.Info("[OK]: All Regular Expressions created successfully.")
 
-	// Setup RSA (if not exists) + Initialize PASETO
-	err = pkg.CheckRSAKeyPairExists()
-	if err != nil {
-		err = pkg.GenerateRSAKeyPair()
-		if err != nil {
-			panic(fmt.Errorf(failMsg, err))
-		}
-		cmd.Log.Info("[OK]: RSA keypair generated and saved successfully.")
-	} else {
-		cmd.Log.Info("[OK]: Using existing RSA keypair.")
-	}
-	err = pkg.InitPaseto()
-	if err != nil {
-		panic(fmt.Errorf(failMsg, err))
-	}
-	cmd.Log.Info("[OK]: PASETO initialized successfully.")
-
 	// Initialize database connection pool
 	cmd.DBPool, err = cmd.InitDB()
 	if err != nil {
 		panic(fmt.Errorf(failMsg, err))
 	}
 	cmd.Log.Info("[OK]: DB initialized successfully.")
-
-	// Initialize redis (cache)
 
 	// Initialize Server
 	server := InitServer()
@@ -81,16 +60,6 @@ func StartApp() {
 }
 
 func InitServer() *gin.Engine {
-
-	config := cors.Config{
-		AllowOrigins:              []string{cmd.EnvVars.Domain},
-		AllowWildcard:             true,
-		AllowMethods:              []string{"GET", "POST", "DELETE", "PUT", "OPTIONS"},
-		AllowHeaders:              []string{"X-Csrf-Token", "Origin", "Content-Type"},
-		AllowCredentials:          true,
-		OptionsResponseStatusCode: 204,
-		MaxAge:                    12 * time.Hour,
-	}
 
 	// Gin Configurations for Logging, Monitoring and Panic-Recovery
 	ginLogs, err := os.Create("gin.log")
@@ -105,7 +74,6 @@ func InitServer() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.New()
-	router.Use(cors.New(config)) // Setup CORS() first before other middlewares
 	router.Use(mw.RecoveryMiddleware)
 	router.Use(gin.Logger())
 
@@ -116,20 +84,24 @@ func InitServer() *gin.Engine {
 		return
 	})
 
-	v1 := router.Group("/api/v1")
+	v1 := router.Group("/api")
 	Routes(v1)
 	return router
 }
 
 func Routes(engine *gin.RouterGroup) {
-	engine.GET("/user/login", c.LoginUserCsrf)
-	engine.POST("/user/login", mw.VerifyCsrf, c.LoginUser)
-	engine.GET("/user/register", c.RegisterUserAccountCsrf)
-	engine.POST("/user/register", mw.VerifyCsrf, c.RegisterUserAccount)
-	engine.GET("/user/register/otp/resend", c.ResendUserOtpCsrf)
-	engine.POST("/user/register/otp/resend", mw.VerifyCsrf, c.ResendUserOtp)
-	engine.GET("/user/session", mw.Auth, c.UserSession)
-	engine.GET("/user/logout", mw.Auth, c.LogoutUser)
+
+	engine.POST("/auth/github", c.InitiateGitHubOAuth)
+	engine.POST("/auth/github/callback", c.CompleteGitHubOAuth)
+	engine.POST("/auth/register", c.RegisterUserAccount)
+	engine.POST("/auth/register/otp/verify", c.RegisterUserOtpVerify)
+	engine.POST("/auth/register/otp/resend", c.RegisterUserOtpResend)
+
+	engine.GET("/profile", c.FetchUserAccount)
+	engine.GET("/leaderboard", c.FetchLeaderboard)
+	engine.GET("/projects", c.FetchProjects)
+	engine.GET("/issues/:projectId", c.FetchIssues)
+	engine.GET("/updates/live", c.FetchLiveUpdates)
 }
 
 func main() {
