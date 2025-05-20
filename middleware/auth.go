@@ -3,7 +3,6 @@ package middleware
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/IAmRiteshKoushik/pulse/cmd"
 	"github.com/IAmRiteshKoushik/pulse/pkg"
@@ -11,48 +10,50 @@ import (
 )
 
 func Auth(c *gin.Context) {
-	if !strings.HasPrefix(c.Request.RequestURI, "/api/v1") {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error": "Server could not understand the URL",
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		cmd.Log.Warn(fmt.Sprintf("Authorization failed at %s %s", c.Request.Method, c.FullPath()))
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"message": "Authorization header required",
 		})
 		return
 	}
 
-	RefreshCookie, refErr := c.Cookie("refresh_token")
-	if refErr == http.ErrNoCookie {
+	tokenString := ""
+	if len(authHeader) > 7 && authHeader[0:7] == "Bearer " {
+		tokenString = authHeader[7:]
+	} else {
+		cmd.Log.Warn(fmt.Sprintf("Authorization failed at %s %s", c.Request.Method, c.FullPath()))
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"message": "Invalid Authorization header format",
+		})
+		return
+	}
+
+	claims, err := pkg.VerifyToken(tokenString)
+	if err != nil {
+		cmd.Log.Error(fmt.Sprintf("Authorization failed at %s %s", c.Request.Method, c.FullPath()),
+			err)
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"message": "Invalid or expired token",
+		})
+		return
+	}
+
+	validIssuer := claims.Issuer == "api.season-of-code"
+	validSub := claims.Subject == "access_token" || claims.Subject == "temp_token"
+	validAudience := len(claims.Audience) == 1
+	if !validIssuer || !validSub || !validAudience {
 		cmd.Log.Error(
-			fmt.Sprintf("[AUTH-ERROR]: RefreshToken not found at %s %s",
-				c.Request.Method,
-				c.FullPath(),
-			), refErr)
-		pkg.NullifyCookies(c)
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "Authorization denied",
+			fmt.Sprintf("Tampered token sent at %s %s", c.Request.Method, c.FullPath()),
+			err)
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+			"message": "Server refused to process the request",
 		})
 		return
 	}
 
-	_, authErr := c.Cookie("access_token")
-	if authErr == http.ErrNoCookie {
-		token, err := pkg.CheckForRefreshToken(RefreshCookie)
-		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "Authorization denied",
-			})
-			return
-		}
-		claims := token.Claims()
-		_ = pkg.CreateAuthToken(
-			// TODO: Type assertion to get around the error for now.
-			// Need a more robust solution later on.
-			claims["audience"].(string),
-			claims["jti"].(string),
-			claims["USER-ROLE"].(bool),
-			claims["HOST-ROLE"].(bool),
-			claims["STAFF-ROLE"].(bool),
-		)
-		// TODO: After creating new tokens, setup the tokens in the cookies
-	}
-
+	c.Set("email", claims.ID)
+	c.Set("username", claims.Audience[0])
 	c.Next()
 }
