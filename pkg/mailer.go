@@ -7,7 +7,10 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-func SendMail(to []string, subject, body string) error {
+func SendMail(to []string, otp string) error {
+
+	subject := "OTP for Onboarding ACM's Season of Code 2025"
+	body := fmt.Sprintf("Your OTP for logging into the Season of Code is %s. This is valid for only 5 minutes.", otp)
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", cmd.EnvVars.GmailUser)
