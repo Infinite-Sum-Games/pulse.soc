@@ -62,7 +62,8 @@ the setup instructions remain the same, but need to be tailored to Windows.
 3. Run individual requests.
 
 > There are scripts in place which automatically populate the Authorization 
-header for requests after the `Login Request`. 
+header for requests after the `Login Request`. You do not have to additionally 
+take the token and supply it in reach request manually.
 
 ### Authors
 This application has been built and tested by [Ritesh Koushik](https://github.com/IAmRiteshKoushik).
