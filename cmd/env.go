@@ -3,10 +3,9 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
-
-	"slices"
 
 	"github.com/joho/godotenv"
 )
@@ -14,11 +13,17 @@ import (
 var EnvVars *EnvConfig
 
 type EnvConfig struct {
-	Environment  string
-	Port         int
-	Domain       string
-	CookieSecure bool
-	DBUrl        string
+	Environment    string
+	Port           int
+	DBUrl          string
+	TokenSecret    string
+	SmtpHost       string
+	SmtpPort       int
+	GmailUser      string
+	AppPassword    string
+	GhClientId     string // github
+	GhClientSecret string
+	GhRedirectUrl  string
 }
 
 func NewEnvConfig() (*EnvConfig, error) {
@@ -32,16 +37,21 @@ func NewEnvConfig() (*EnvConfig, error) {
 
 	environment := os.Getenv("ENVIRONMENT")
 	port := os.Getenv("PORT")
-	domain := os.Getenv("DOMAIN")
-	cookieSecure := os.Getenv("COOKIE_SECURE")
 	dbUrl := os.Getenv("DATABASE_URL")
+	tokenSecret := os.Getenv("JWT_SECRET")
+	smtpHost := os.Getenv("SMTP_HOST")
+	smtpPort := os.Getenv("SMTP_PORT")
+	gmailUser := os.Getenv("GMAIL_USERNAME")
+	appPwd := os.Getenv("GMAIL_APP_PASSWORD")
 
+	// Environment
 	environment = strings.ToLower(environment)
 	isValid := slices.Contains(validEnvs, environment)
 	if !isValid {
 		return nil, fmt.Errorf("Invalid ENVIRONMENT value: %s", environment)
 	}
 	cfg.Environment = environment
+	// Port
 	if port == "" {
 		return nil, fmt.Errorf("PORT environment variable is missing.")
 	}
@@ -50,22 +60,38 @@ func NewEnvConfig() (*EnvConfig, error) {
 		return nil, fmt.Errorf("Invalid PORT value: %w", err)
 	}
 	cfg.Port = portNum
-	if domain == "" {
-		return nil, fmt.Errorf("DOMAIN environment variable is missing.")
-	}
-	cfg.Domain = domain
-	if cookieSecure == "" {
-		return nil, fmt.Errorf("COOKIE_SECURE environment variable is missing.")
-	}
-	cookieSecurityBool, err := strconv.ParseBool(cookieSecure)
-	if err != nil {
-		return nil, fmt.Errorf("Invalid COOKIE_SECURE value %s", cookieSecure)
-	}
-	cfg.CookieSecure = cookieSecurityBool
+	// Database URL
 	if dbUrl == "" {
 		return nil, fmt.Errorf("DATABASE_URL environment variable is missing.")
 	}
 	cfg.DBUrl = dbUrl
+	// Token secret
+	if tokenSecret == "" {
+		return nil, fmt.Errorf("TOKEN_SECRET environment variable is missing.")
+	}
+	cfg.TokenSecret = tokenSecret
+	// SMTP host and port
+	if smtpHost == "" {
+		return nil, fmt.Errorf("GMAIL_USERNAME environment variable is missing.")
+	}
+	cfg.SmtpHost = smtpHost
+	if smtpPort == "" {
+		return nil, fmt.Errorf("SMTP_PORT environment variable is missing.")
+	}
+	cfg.SmtpPort, err = strconv.Atoi(smtpPort)
+	if err != nil {
+		return nil, err
+	}
+	// Gmail user
+	if gmailUser == "" {
+		return nil, fmt.Errorf("GMAIL_USERNAME environment variable is missing.")
+	}
+	cfg.GmailUser = gmailUser
+	// App password
+	if appPwd == "" {
+		return nil, fmt.Errorf("GMAIL_APP_PASSWORD environment variable is missing.")
+	}
+	cfg.AppPassword = appPwd
 
 	return cfg, nil
 }
