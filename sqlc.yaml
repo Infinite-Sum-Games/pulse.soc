@@ -20,4 +20,6 @@ sql:
             go_type:
               import: "time"
               type: "Time"
+          - db_type: "jsonb"
+            go_type: "github.com/jackc/pgx/v5/pgtype.JSONB"
 
