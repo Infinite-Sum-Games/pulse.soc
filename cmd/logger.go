@@ -29,7 +29,7 @@ func NewLoggerService(environment string, file *os.File) *LoggerService {
 
 	if environment == "development" {
 		// Logging to both file and std.out during development
-		fileOut := zerolog.ConsoleWriter{Out: file, TimeFormat: time.RFC3339}
+		fileOut := zerolog.ConsoleWriter{Out: file, TimeFormat: time.RFC3339, NoColor: true}
 		consoleOut := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
 		output = zerolog.MultiLevelWriter(consoleOut, fileOut)
 

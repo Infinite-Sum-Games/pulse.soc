@@ -15,7 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func init() {
+func StartApp() {
 	failMsg := "Could not initialize app\n%w"
 
 	// Initialize global environment variables
@@ -47,13 +47,11 @@ func init() {
 		panic(fmt.Errorf(failMsg, err))
 	}
 	cmd.Log.Info("[OK]: DB initialized successfully.")
-}
 
-func setup() *gin.Engine {
+	// Starting the server
 	ginLogs, err := os.Create("gin.log")
 	if err != nil {
 		cmd.Log.Fatal("Error creating log file for Gin", err)
-		return nil
 	}
 	defer ginLogs.Close()
 	multiWriter := io.MultiWriter(os.Stdout, ginLogs)
@@ -87,15 +85,14 @@ func setup() *gin.Engine {
 	v1.GET("/issues/:projectId", mw.Auth, c.FetchIssues)
 	v1.GET("/updates/live", mw.Auth, c.FetchLiveUpdates)
 
-	return router
-}
-
-func main() {
-	server := setup()
 	port := strconv.Itoa(cmd.EnvVars.Port)
 	cmd.Log.Info("[OK]: Server configured and starting on PORT " + port)
-	err := server.Run(":" + port)
+	err = router.Run(":" + port)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func main() {
+	StartApp()
 }
