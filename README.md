@@ -29,7 +29,12 @@ string is the default string provided in `.env.example`
 3. Run the database migrations as follows:
 ```bash
 # Download the tool from https://github.com/pressly/goose
-goose up
+# 1. For creating tables
+make up
+# 2. For adding seed data
+make seed
+# 3. For cleaning and deleting all tables
+make down
 ```
 4. Generate all the database helper functions by running:
 ```bash

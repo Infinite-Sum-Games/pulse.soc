@@ -1,10 +1,10 @@
--- +gooseUp
+-- +goose Up
+
 -- +goose StatementBegin
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE SCHEMA IF NOT EXISTS "public";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- +goose StatementEnd
 
--- +goose Up
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS maintainers(
   id SERIAL NOT NULL,
@@ -19,8 +19,7 @@ CREATE TABLE IF NOT EXISTS maintainers(
 CREATE TABLE IF NOT EXISTS user_account(
   id SERIAL NOT NULL,
   email TEXT NOT NULL,
-  ghId TEXT,
-  ghUsername TEXT NOT NULL,
+  ghUsername TEXT NOT NULL UNIQUE,
   status BOOLEAN DEFAULT true,
   bounty INT NOT NULL DEFAULT 0,
   refresh_token TEXT,
@@ -71,6 +70,7 @@ CREATE TABLE IF NOT EXISTS issues(
   updated_at TIMESTAMP DEFAULT NOW(),
 
   CONSTRAINT "issues_pkey" PRIMARY KEY (id)
+  -- CONSTRAINT "issues_repoid_fkey"
 );
 -- +goose StatementEnd
 
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS issue_claims(
 CREATE TABLE IF NOT EXISTS bounty_log(
   id SERIAL NOT NULL,
   ghUsername TEXT NOT NULL,
-  dispatchedBy TEXT NOT NULL,
+  dispatched_by TEXT NOT NULL,
   proof_url TEXT NOT NULL,
   repo_id UUID NOT NULL,
   amount INTEGER NOT NULL,
@@ -145,5 +145,5 @@ CREATE TABLE IF NOT EXISTS badge_dispatch(
 
 -- +goose Down
 -- +goose StatementBegin
-DROP SCHEMA IF EXISTS public;
+DROP SCHEMA IF EXISTS public CASCADE;
 -- +goose StatementEnd
