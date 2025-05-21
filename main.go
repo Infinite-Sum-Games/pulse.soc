@@ -8,15 +8,14 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
-
 	cmd "github.com/IAmRiteshKoushik/pulse/cmd"
 	c "github.com/IAmRiteshKoushik/pulse/controllers"
 	mw "github.com/IAmRiteshKoushik/pulse/middleware"
 	pkg "github.com/IAmRiteshKoushik/pulse/pkg"
+	"github.com/gin-gonic/gin"
 )
 
-func StartApp() {
+func init() {
 	failMsg := "Could not initialize app\n%w"
 
 	// Initialize global environment variables
@@ -48,20 +47,9 @@ func StartApp() {
 		panic(fmt.Errorf(failMsg, err))
 	}
 	cmd.Log.Info("[OK]: DB initialized successfully.")
-
-	// Initialize Server
-	server := InitServer()
-	port := strconv.Itoa(cmd.EnvVars.Port)
-	cmd.Log.Info("[OK]: Server configured and starting on PORT " + port)
-	err = server.Run(":" + port)
-	if err != nil {
-		panic(fmt.Errorf(failMsg, err))
-	}
 }
 
-func InitServer() *gin.Engine {
-
-	// Gin Configurations for Logging, Monitoring and Panic-Recovery
+func setup() *gin.Engine {
 	ginLogs, err := os.Create("gin.log")
 	if err != nil {
 		cmd.Log.Fatal("Error creating log file for Gin", err)
@@ -84,26 +72,30 @@ func InitServer() *gin.Engine {
 		return
 	})
 
-	v1 := router.Group("/api")
-	Routes(v1)
+	v1 := router.Group("/api/v1")
+
+	v1.POST("/auth/github", c.InitiateGitHubOAuth)
+	v1.POST("/auth/github/callback", c.CompleteGitHubOAuth)
+	v1.POST("/auth/register", c.RegisterUserAccount)
+	v1.POST("/auth/register/otp/verify", mw.Auth, c.RegisterUserOtpVerify)
+	v1.GET("/auth/register/otp/resend", mw.Auth, c.RegisterUserOtpResend)
+	v1.GET("/auth/refresh", c.RegenerateToken)
+
+	v1.GET("/profile", mw.Auth, c.FetchUserAccount)
+	v1.GET("/leaderboard", mw.Auth, c.FetchLeaderboard)
+	v1.GET("/projects", mw.Auth, c.FetchProjects)
+	v1.GET("/issues/:projectId", mw.Auth, c.FetchIssues)
+	v1.GET("/updates/live", mw.Auth, c.FetchLiveUpdates)
+
 	return router
 }
 
-func Routes(engine *gin.RouterGroup) {
-
-	engine.POST("/auth/github", c.InitiateGitHubOAuth)
-	engine.POST("/auth/github/callback", c.CompleteGitHubOAuth)
-	engine.POST("/auth/register", c.RegisterUserAccount)
-	engine.POST("/auth/register/otp/verify", c.RegisterUserOtpVerify)
-	engine.POST("/auth/register/otp/resend", c.RegisterUserOtpResend)
-
-	engine.GET("/profile", c.FetchUserAccount)
-	engine.GET("/leaderboard", c.FetchLeaderboard)
-	engine.GET("/projects", c.FetchProjects)
-	engine.GET("/issues/:projectId", c.FetchIssues)
-	engine.GET("/updates/live", c.FetchLiveUpdates)
-}
-
 func main() {
-	StartApp()
+	server := setup()
+	port := strconv.Itoa(cmd.EnvVars.Port)
+	cmd.Log.Info("[OK]: Server configured and starting on PORT " + port)
+	err := server.Run(":" + port)
+	if err != nil {
+		panic(err)
+	}
 }
