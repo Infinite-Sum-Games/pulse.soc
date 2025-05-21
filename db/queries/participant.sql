@@ -8,7 +8,7 @@ SELECT EXISTS
 
 -- name: FetchAllProjectsQuery :many
 SELECT 
-  id, name, url, maintainers, tags
+  id, name, description, url, maintainers, tags, is_internal
 FROM 
   repository;
 

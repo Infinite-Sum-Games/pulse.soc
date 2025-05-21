@@ -48,9 +48,11 @@ CREATE TABLE IF NOT EXISTS user_onboarding(
 CREATE TABLE IF NOT EXISTS repository(
   id UUID NOT NULL,
   name TEXT NOT NULL,
+  description TEXT NOT NULL,
   url TEXT NOT NULL,
   maintainers TEXT[],
   tags TEXT[],
+  is_internal BOOLEAN DEFAULT false,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW(),
 
