@@ -7,8 +7,7 @@ FROM
   user_account
 WHERE
   status = true
-  AND ghUsername = $1
-  AND refresh_token IS NOT NULL;
+  AND ghUsername = $1;
   
 -- name: FetchBadgesQuery :many
 SELECT

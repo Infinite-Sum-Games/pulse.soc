@@ -1,3 +1,27 @@
+-- name: CheckUserExistQuery :one
+SELECT
+  ghUsername,
+  email
+FROM 
+  user_account
+WHERE
+  status = true
+  AND ghUsername = $1;
+
+-- name: AddRefreshTokenQuery :one
+UPDATE user_account
+SET
+  refresh_token = $1
+WHERE
+  ghUsername = $2
+  AND status = true
+  AND updated_at = NOW()
+RETURNING
+  email,
+  ghUsername,
+  refresh_token,
+  bounty;
+
 -- name: CheckRefreshTokenQuery :one
 SELECT
   ghUsername, email
@@ -9,5 +33,3 @@ WHERE
   AND status = true;
 
 -- name: OnboardUserQuery :one
-
--- name: AddRefreshTokenQuery :one
