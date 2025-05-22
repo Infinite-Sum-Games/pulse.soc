@@ -12,7 +12,7 @@ post {
 
 body:json {
   {
-    "otp": "058579"
+    "otp": "110350"
   }
 }
 
@@ -20,7 +20,7 @@ script:pre-request {
   const accessKey = bru.getEnvVar("access_key");
   if (accessKey) {
       const authHeaderValue = `Bearer ${accessKey}`;
-      bru.setReqHeader("Authorization", authHeaderValue);
+      req.setHeader("Authorization", authHeaderValue);
       console.log("Authorization header set:", authHeaderValue);
   } else {
       console.warn("No 'access_key' found in environment variables.");
