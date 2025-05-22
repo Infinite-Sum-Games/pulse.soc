@@ -176,11 +176,27 @@ INSERT INTO repository
   true),
 (
   gen_random_uuid(),
+  'NodeGainsDB: Ligthweight In-Memory GraphDB',
+  'A jacked Python graph DB with nodes and edges. Lift data with GymQL, spot connections, and flex your gains. Indexed for speed, stored in JSON, and terminal-run. Build your data muscles!',
+  'https://github.com/Astrasv/NodeGainsDB',
+  '{"Astrasv"}',
+  '{"python"}',
+  true),
+(
+  gen_random_uuid(),
   'File-Sharing-App',
   'A web application for sharing files.', 
   'https://github.com/karthik-saiharsh/file-sharing-app',
   '{"karthik-saiharsh"}',
   '{"nextjs", "typescript"}',
+  true),
+(
+  gen_random_uuid(),
+  'Rubiks Cube Solver (3x3 and 2x2)',
+  'This project uses breadth-first search (BFS), iterative deepening depth-first search (IDDFS), and iterative deepening A* (IDA*) algorithms to efficiently solve the Rubiks Cube from any starting state to the solved configuration',
+  'https://github.com/Astrasv/CubeSolver',
+  '{"Astrasv"}',
+  '{"python","reactjs", "javascript"}',
   true),
 (
   gen_random_uuid(), 
