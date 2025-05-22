@@ -1,0 +1,28 @@
+meta {
+  name: RegisterUserOtp
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/auth/register/otp/verify
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "otp": "058579"
+  }
+}
+
+script:pre-request {
+  const accessKey = bru.getEnvVar("access_key");
+  if (accessKey) {
+      const authHeaderValue = `Bearer ${accessKey}`;
+      bru.setReqHeader("Authorization", authHeaderValue);
+      console.log("Authorization header set:", authHeaderValue);
+  } else {
+      console.warn("No 'access_key' found in environment variables.");
+  }
+}

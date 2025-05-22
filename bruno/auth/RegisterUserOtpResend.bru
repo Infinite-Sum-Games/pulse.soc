@@ -1,0 +1,26 @@
+meta {
+  name: RegisterUserOtpResend
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/auth/register/otp/resend
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkuc2Vhc29uLW9mLWNvZGUiLCJzdWIiOiJ0ZW1wX3Rva2VuIiwiYXVkIjpbIklBbVJpdGVzaEtvdXNoaWsiXSwiZXhwIjoxNzQ3OTExMjc3LCJpYXQiOjE3NDc5MTA5NzcsImp0aSI6ImNiLmVuLnU0Y3NlMjIwMzhAY2Iuc3R1ZGVudHMuYW1yaXRhLmVkdSJ9.WviZ50zqyMJyj1B7Jqg5Z3FP3F-1O7XDJaJFuB4EUk4
+}
+
+script:pre-request {
+  const accessKey = bru.getEnvVar("access_key");
+  if (accessKey) {
+      const authHeaderValue = `Bearer ${accessKey}`;
+      req.setHeader("Authorization", authHeaderValue);
+      console.log("Authorization header set:", authHeaderValue);
+  } else {
+      console.warn("No 'access_key' found in environment variables.");
+  }
+}

@@ -1,7 +1,7 @@
 meta {
   name: RegisterUser
   type: http
-  seq: 5
+  seq: 4
 }
 
 post {
@@ -12,10 +12,15 @@ post {
 
 body:json {
   {
-    "email": "roll_no@cb.student.amrita.edu",
-    "github_username": "github_username",
-    "first_name": "firstName",
-    "middle_name": "middleName",
-    "last_name": "lastName"
+    "email": "cb.en.u4cse22038@cb.students.amrita.edu",
+    "github_username": "IAmRiteshKoushik",
+    "first_name": "Ritesh",
+    "middle_name": "",
+    "last_name": "Koushik"
   }
+}
+
+script:post-response {
+  bru.setEnvVar("access_key",res.body["access_key"]);
+  
 }
