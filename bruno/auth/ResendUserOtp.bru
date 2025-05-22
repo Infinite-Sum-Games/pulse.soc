@@ -5,7 +5,13 @@ meta {
 }
 
 post {
-  url: {{baseUrl}}/auth/user/register/otp/resend
-  body: none
+  url: {{baseUrl}}/auth/register/otp/resend
+  body: json
   auth: none
+}
+
+body:json {
+  {
+    "otp": "1234456"
+  }
 }
