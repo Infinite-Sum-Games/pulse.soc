@@ -56,6 +56,22 @@ func RegisterUserAccount(c *gin.Context) {
 	defer tx.Rollback(ctx)
 
 	q := db.New()
+	ok, err := q.CheckUserExistQuery(ctx, tx, body.GhUsername)
+	if err != nil {
+		cmd.Log.Debug("Error here")
+		pkg.DbError(c, err)
+		return
+	}
+	if ok {
+		cmd.Log.Warn(
+			fmt.Sprintf("Username exists, registration failed at %s %s",
+				c.Request.Method, c.FullPath()))
+		c.JSON(http.StatusConflict, gin.H{
+			"message": "Username already exists",
+		})
+		return
+	}
+
 	result, err := q.BeginUserRegistrationQuery(ctx, tx,
 		db.BeginUserRegistrationQueryParams{
 			Email:      body.Email,
@@ -66,15 +82,20 @@ func RegisterUserAccount(c *gin.Context) {
 		pkg.DbError(c, err)
 		return
 	}
+	if err := tx.Commit(ctx); err != nil {
+		pkg.DbError(c, err)
+		return
+	}
 
 	// Database transaction fails if mail is not sent
 	err = pkg.SendMail([]string{result.Email}, result.Otp)
 	if err != nil {
-		return
-	}
-
-	if err = tx.Commit(ctx); err != nil {
-		pkg.DbError(c, err)
+		cmd.Log.Error(
+			fmt.Sprintf("Failed to send email at %s %s", c.Request.Method, c.FullPath()),
+			err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Oops! Something happened. Please try again later.",
+		})
 		return
 	}
 
@@ -193,7 +214,7 @@ func RegisterUserOtpResend(c *gin.Context) {
 		pkg.DbError(c, err)
 		return
 	}
-	conn.Release()
+	defer conn.Release()
 
 	q := db.New()
 	result, err := q.CheckForExistingOtpQuery(ctx, conn, username)
@@ -203,7 +224,7 @@ func RegisterUserOtpResend(c *gin.Context) {
 	}
 	if result.Email == "" {
 		cmd.Log.Info(
-			fmt.Sprintf("Request processed successfully at %s %s",
+			fmt.Sprintf("OTP not found as time elapsed at %s %s",
 				c.Request.Method, c.FullPath()))
 		c.JSON(http.StatusNotFound, gin.H{
 			"message": "Time elapsed for resend. Please try again.",

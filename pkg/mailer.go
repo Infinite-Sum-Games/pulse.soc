@@ -29,6 +29,6 @@ func SendMail(to []string, otp string) error {
 		return err
 	}
 
-	cmd.Log.Info("[SUCCESS]: Email send successfully.")
+	cmd.Log.Info("[SUCCESS]: Email sent successfully.")
 	return nil
 }

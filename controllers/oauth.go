@@ -94,7 +94,7 @@ func CompleteGitHubOAuth(c *gin.Context) {
 	defer tx.Rollback(ctx)
 
 	q := db.New()
-	userExist, err := q.CheckUserExistQuery(ctx, tx, user.Username)
+	userExist, err := q.RetriveExistingUserQuery(ctx, tx, user.Username)
 	if err != nil {
 		pkg.DbError(c, err)
 		return
@@ -218,7 +218,7 @@ func RegenerateToken(c *gin.Context) {
 		Email:        claims.ID,
 		RefreshToken: pgtype.Text{String: tokenString, Valid: true},
 	})
-	if err != nil || result.Ghusername == "" {
+	if err != nil {
 		pkg.DbError(c, err)
 		return
 	}

@@ -1,12 +1,19 @@
 -- name: CheckUserExistQuery :one
+SELECT EXISTS(
+    SELECT 1
+    FROM user_account
+    WHERE
+      ghUsername = $1
+  );
+
+-- name: RetriveExistingUserQuery :one
 SELECT
-  ghUsername,
-  email
-FROM 
+  email,
+  ghUsername
+FROM
   user_account
 WHERE
-  status = true
-  AND ghUsername = $1;
+  ghUsername = $1;
 
 -- name: AddRefreshTokenQuery :one
 UPDATE user_account
