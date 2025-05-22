@@ -152,9 +152,10 @@ func CompleteGitHubOAuth(c *gin.Context) {
 		"email":           loginUser.Email,
 		"bounty":          loginUser.Bounty,
 	})
-	cmd.Log.Info(
-		fmt.Sprintf("Successfully processed login request at %s %s",
-			c.Request.Method, c.FullPath()))
+	cmd.Log.Info(fmt.Sprintf(
+		"[SUCCESS]: Processed request at %s %s",
+		c.Request.Method, c.FullPath(),
+	))
 	return
 }
 
@@ -243,8 +244,9 @@ func RegenerateToken(c *gin.Context) {
 		"message":   "Token refreshed successfully",
 		"accessKey": accessToken,
 	})
-	cmd.Log.Info(
-		fmt.Sprintf("Request processed successfully at %s %s",
-			c.Request.Method, c.FullPath()))
+	cmd.Log.Info(fmt.Sprintf(
+		"[SUCCESS]: Processed request at %s %s",
+		c.Request.Method, c.FullPath(),
+	))
 	return
 }

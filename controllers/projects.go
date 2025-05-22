@@ -35,6 +35,10 @@ func FetchProjects(c *gin.Context) {
 		"message":  "Projects retrived successfully",
 		"projects": results,
 	})
+	cmd.Log.Info(fmt.Sprintf(
+		"[SUCCESS]: Processed request at %s %s",
+		c.Request.Method, c.FullPath(),
+	))
 	return
 }
 
@@ -87,6 +91,9 @@ func FetchIssues(c *gin.Context) {
 		"message":  "Issues retrived successfully",
 		"projects": results,
 	})
-	cmd.Log.Info(fmt.Sprintf("Request processed successfully at %s %s"))
+	cmd.Log.Info(fmt.Sprintf(
+		"[SUCCESS]: Processed request at %s %s",
+		c.Request.Method, c.FullPath(),
+	))
 	return
 }

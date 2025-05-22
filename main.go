@@ -67,6 +67,10 @@ func StartApp() {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Server is LIVE",
 		})
+		cmd.Log.Info(fmt.Sprintf(
+			"[SUCCESS]: Processed request at %s %s",
+			c.Request.Method, c.FullPath(),
+		))
 		return
 	})
 

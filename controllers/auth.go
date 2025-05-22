@@ -15,7 +15,7 @@ import (
 
 func RegisterUserAccount(c *gin.Context) {
 	var body types.RegisterUserRequest
-	if err := c.BindJSON(body); err != nil {
+	if err := c.BindJSON(&body); err != nil {
 		pkg.JSONUnmarshallError(c, err)
 		return
 	}
@@ -92,7 +92,13 @@ func RegisterUserAccount(c *gin.Context) {
 func RegisterUserOtpVerify(c *gin.Context) {
 	username, ok := pkg.GrabUsername(c)
 	if !ok {
-
+		cmd.Log.Warn(
+			fmt.Sprintf("Failed to extract username from token at %s %s",
+				c.Request.Method, c.FullPath()))
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Oops! Something happened. Please try again later.",
+		})
+		return
 	}
 
 	var body types.RegisterUserOtpVerifyRequest
@@ -161,9 +167,10 @@ func RegisterUserOtpVerify(c *gin.Context) {
 		"message":         "User Registration successful.",
 		"github_username": onboardGhUsername,
 	})
-	cmd.Log.Info(
-		fmt.Sprintf("Request successfully processed at %s %s",
-			c.Request.Method, c.FullPath()))
+	cmd.Log.Info(fmt.Sprintf(
+		"[SUCCESS]: Processed request at %s %s",
+		c.Request.Method, c.FullPath()))
+	return
 }
 
 func RegisterUserOtpResend(c *gin.Context) {
@@ -218,8 +225,9 @@ func RegisterUserOtpResend(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "User OTP resent at specified email address",
 	})
-	cmd.Log.Info(
-		fmt.Sprintf("Request processed successfully at %s %s",
-			c.Request.Method, c.FullPath()))
+	cmd.Log.Info(fmt.Sprintf(
+		"[SUCCESS]: Processed request at %s %s",
+		c.Request.Method, c.FullPath(),
+	))
 	return
 }
