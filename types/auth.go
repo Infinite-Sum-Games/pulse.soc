@@ -57,16 +57,13 @@ func (r *RegisterUserRequest) Validate() error {
 }
 
 type RegisterUserOtpVerifyRequest struct {
-	Email string `json:"email"`
-	Otp   string `json:"otp"`
+	Otp string `json:"otp"`
 }
 
 func (r *RegisterUserOtpVerifyRequest) Validate() error {
-	r.Email = strings.TrimSpace(r.Email)
 	r.Otp = strings.TrimSpace(r.Otp)
 
 	return v.ValidateStruct(r,
-		v.Field(&r.Email, v.Required, is.EmailFormat),
 		v.Field(&r.Otp, v.Required, v.Length(6, 6), is.Digit),
 	)
 }

@@ -41,3 +41,37 @@ FROM
 WHERE
   ghUsername = $1
   AND expiry_at >= NOW() + INTERVAL '1 minute';
+
+-- name: BeginUserRegistrationQuery :one
+INSERT INTO 
+  user_onboarding
+  (
+    email,
+    ghUsername,
+    otp,
+    expiry_at
+  )
+VALUES ($1, $2, $3, NOW() + INTERVAL '5 minutes')
+RETURNING
+  email, otp;
+
+-- name: VerifyOtpQuery :one
+DELETE FROM 
+  user_onboarding
+WHERE
+  ghUsername = $1
+  AND otp = $2
+  AND expiry_at > NOW()
+RETURNING
+  email, ghUsername;
+
+-- name: CreateUserAccountQuery :one
+INSERT INTO
+  user_account
+  (
+    email,
+    ghUsername
+  )
+VALUES ($1, $2)
+RETURNING
+  ghUsername;
