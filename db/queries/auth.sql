@@ -11,11 +11,11 @@ WHERE
 -- name: AddRefreshTokenQuery :one
 UPDATE user_account
 SET
-  refresh_token = $1
+  refresh_token = $1,
+  updated_at = NOW()
 WHERE
   ghUsername = $2
   AND status = true
-  AND updated_at = NOW()
 RETURNING
   email,
   ghUsername,

@@ -34,7 +34,7 @@ func (r *RegisterUserRequest) Validate() error {
 		),
 		v.Field(&r.GhUsername, v.Required, v.Length(3, 50)),
 		v.Field(&r.FirstName, v.Required, v.Length(2, 50), is.Alpha),
-		v.Field(&r.MiddleName, v.Required, v.Length(2, 50), is.Alpha),
+		v.Field(&r.MiddleName, v.Length(0, 50), is.Alpha),
 		v.Field(&r.LastName, v.Required, v.Length(1, 50), is.Alpha),
 	)
 	if err != nil {

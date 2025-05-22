@@ -43,6 +43,10 @@ func StartApp() {
 	}
 	cmd.Log.Info("[OK]: DB initialized successfully.")
 
+	// Initialize oAuth
+	cmd.OAuthInit()
+	cmd.Log.Info("[OK]: GitHub oAuth configuration loaded successfully.")
+
 	// Starting the server
 	ginLogs, err := os.Create("gin.log")
 	if err != nil {
@@ -78,8 +82,8 @@ func StartApp() {
 
 	v1 := router.Group("/api/v1")
 
-	v1.POST("/auth/github", c.InitiateGitHubOAuth)
-	v1.POST("/auth/github/callback", c.CompleteGitHubOAuth)
+	v1.GET("/auth/github", c.InitiateGitHubOAuth)
+	v1.GET("/auth/github/callback", c.CompleteGitHubOAuth)
 	v1.POST("/auth/register", c.RegisterUserAccount)
 	v1.POST("/auth/register/otp/verify", mw.Auth, c.RegisterUserOtpVerify)
 	v1.GET("/auth/register/otp/resend", mw.Auth, c.RegisterUserOtpResend)

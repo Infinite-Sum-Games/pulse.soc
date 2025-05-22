@@ -119,7 +119,7 @@ func RegisterUserOtpVerify(c *gin.Context) {
 		pkg.DbError(c, err)
 		return
 	}
-	tx.Rollback(ctx)
+	defer tx.Rollback(ctx)
 
 	q := db.New()
 	verifiedUser, err := q.VerifyOtpQuery(ctx, tx, db.VerifyOtpQueryParams{

@@ -19,6 +19,7 @@ import (
 func InitiateGitHubOAuth(c *gin.Context) {
 	url := cmd.GithubOAuthConfig.AuthCodeURL("")
 	c.Redirect(http.StatusTemporaryRedirect, url)
+	cmd.Log.Info("Successfully initiated GitHub oAuth at GET /api/v1/auth/github")
 }
 
 func CompleteGitHubOAuth(c *gin.Context) {
@@ -39,6 +40,7 @@ func CompleteGitHubOAuth(c *gin.Context) {
 	// Fetching the github user
 	token, err := cmd.GithubOAuthConfig.Exchange(ctx, code)
 	if err != nil {
+		fmt.Printf("%v", cmd.GithubOAuthConfig)
 		cmd.Log.Error(
 			fmt.Sprintf("Failed to exchange code for token at %s %s",
 				c.Request.Method, c.FullPath()), err)
@@ -73,9 +75,9 @@ func CompleteGitHubOAuth(c *gin.Context) {
 	// Extracting the github user
 	var user types.GithubUser
 	if err := json.Unmarshal(body, &user); err != nil {
-		cmd.Log.Warn(
+		cmd.Log.Error(
 			fmt.Sprintf("Failed to parse github user info at %s %s",
-				c.Request.Method, c.FullPath()))
+				c.Request.Method, c.FullPath()), err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Oops! Something happened. Please try again later",
 		})
@@ -89,21 +91,12 @@ func CompleteGitHubOAuth(c *gin.Context) {
 		pkg.DbError(c, err)
 		return
 	}
-	tx.Rollback(ctx)
+	defer tx.Rollback(ctx)
 
 	q := db.New()
 	userExist, err := q.CheckUserExistQuery(ctx, tx, user.Username)
 	if err != nil {
 		pkg.DbError(c, err)
-		return
-	}
-	if userExist.Email == "" {
-		cmd.Log.Warn(
-			fmt.Sprintf("Unregistered user attempted to login at %s %s",
-				c.Request.Method, c.FullPath()))
-		c.JSON(http.StatusNotFound, gin.H{
-			"message": "User not registered",
-		})
 		return
 	}
 
@@ -135,6 +128,7 @@ func CompleteGitHubOAuth(c *gin.Context) {
 		RefreshToken: pgtype.Text{String: refreshToken, Valid: true},
 	})
 	if err != nil {
+		cmd.Log.Debug("Error occurred here")
 		pkg.DbError(c, err)
 		return
 	}

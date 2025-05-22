@@ -43,6 +43,9 @@ func NewEnvConfig() (*EnvConfig, error) {
 	smtpPort := os.Getenv("SMTP_PORT")
 	gmailUser := os.Getenv("GMAIL_USERNAME")
 	appPwd := os.Getenv("GMAIL_APP_PASSWORD")
+	ghClientId := os.Getenv("GITHUB_CLIENT_ID")
+	ghClientSecret := os.Getenv("GITHUB_CLIENT_SECRET")
+	ghRedirectUrl := os.Getenv("GITHUB_REDIRECT_URL")
 
 	// Environment
 	environment = strings.ToLower(environment)
@@ -92,6 +95,21 @@ func NewEnvConfig() (*EnvConfig, error) {
 		return nil, fmt.Errorf("GMAIL_APP_PASSWORD environment variable is missing.")
 	}
 	cfg.AppPassword = appPwd
+	// GitHub Client Id
+	if ghClientId == "" {
+		return nil, fmt.Errorf("GITHUB_CLIENT_ID environment variable is missing.")
+	}
+	cfg.GhClientId = ghClientId
+	// GitHub Client Secret
+	if ghClientSecret == "" {
+		return nil, fmt.Errorf("GITHUB_CLIENT_SECRET environment variable is missing.")
+	}
+	cfg.GhClientSecret = ghClientSecret
+	// GitHub Redirect Url
+	if ghRedirectUrl == "" {
+		return nil, fmt.Errorf("GITHUB_REDIRECT_URL environment variable is missing.")
+	}
+	cfg.GhRedirectUrl = ghRedirectUrl
 
 	return cfg, nil
 }
