@@ -32,4 +32,12 @@ WHERE
   AND email = $2
   AND status = true;
 
--- name: OnboardUserQuery :one
+-- name: CheckForExistingOtpQuery :one
+SELECT
+  email,
+  otp
+FROM
+  user_onboarding 
+WHERE
+  ghUsername = $1
+  AND expiry_at >= NOW() + INTERVAL '1 minute';
