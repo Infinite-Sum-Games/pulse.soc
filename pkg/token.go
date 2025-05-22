@@ -34,7 +34,7 @@ func CreateToken(ghUsername, email, tokenType string) (string, error) {
 			Subject:   tokenType,
 		})
 
-	tokenString, err := token.SignedString(cmd.EnvVars.TokenSecret)
+	tokenString, err := token.SignedString([]byte(cmd.EnvVars.TokenSecret))
 	if err != nil {
 		return "", err
 	}
@@ -50,7 +50,7 @@ func VerifyToken(tokenString string) (*jwt.RegisteredClaims, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 			}
-			return cmd.EnvVars.TokenSecret, nil
+			return []byte(cmd.EnvVars.TokenSecret), nil
 		})
 
 	if err != nil {

@@ -7,11 +7,12 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	cmd "github.com/IAmRiteshKoushik/pulse/cmd"
 	c "github.com/IAmRiteshKoushik/pulse/controllers"
 	mw "github.com/IAmRiteshKoushik/pulse/middleware"
-	pkg "github.com/IAmRiteshKoushik/pulse/pkg"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -35,12 +36,6 @@ func StartApp() {
 	cmd.Log = cmd.NewLoggerService(cmd.EnvVars.Environment, f)
 	cmd.Log.Info("[OK]: Logging service configured successfully.")
 
-	// Initialize Regex
-	if err := pkg.InitRegex(); err != nil {
-		panic(fmt.Errorf(failMsg, err))
-	}
-	cmd.Log.Info("[OK]: All Regular Expressions created successfully.")
-
 	// Initialize database connection pool
 	cmd.DBPool, err = cmd.InitDB()
 	if err != nil {
@@ -62,6 +57,13 @@ func StartApp() {
 	router := gin.New()
 	router.Use(mw.RecoveryMiddleware)
 	router.Use(gin.Logger())
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"*"},
+		AllowHeaders:     []string{"*"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	router.GET("/test", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{

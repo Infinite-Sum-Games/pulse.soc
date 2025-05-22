@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 
 	v "github.com/go-ozzo/ozzo-validation/v4"
@@ -25,11 +26,16 @@ func (r *RegisterUserRequest) Validate() error {
 	r.LastName = strings.TrimSpace(r.LastName)
 
 	err := v.ValidateStruct(r,
-		v.Field(&r.Email, v.Required, is.EmailFormat),
+		v.Field(
+			&r.Email,
+			v.Required,
+			is.EmailFormat,
+			v.Match(regexp.MustCompile(`@cb.students.amrita.edu$`)),
+		),
 		v.Field(&r.GhUsername, v.Required, v.Length(3, 50)),
 		v.Field(&r.FirstName, v.Required, v.Length(2, 50), is.Alpha),
 		v.Field(&r.MiddleName, v.Required, v.Length(2, 50), is.Alpha),
-		v.Field(&r.LastName, v.Required, v.Length(2, 50), is.Alpha),
+		v.Field(&r.LastName, v.Required, v.Length(1, 50), is.Alpha),
 	)
 	if err != nil {
 		return err
