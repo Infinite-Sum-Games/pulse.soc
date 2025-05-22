@@ -26,7 +26,7 @@ func SendMail(to []string, otp string) error {
 	)
 
 	if err := d.DialAndSend(m); err != nil {
-		return fmt.Errorf("Could not send email: %v", err)
+		return err
 	}
 
 	cmd.Log.Info("[SUCCESS]: Email send successfully.")
