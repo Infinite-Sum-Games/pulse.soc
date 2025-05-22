@@ -10,14 +10,16 @@ import (
 
 var DBPool *pgxpool.Pool
 
-func InitDB() (*pgxpool.Pool, error) {
+const (
+	defaultMaxConns          = int32(100)
+	defaultMinConns          = int32(5)
+	defaultMaxConnLifetime   = time.Hour
+	defaultMaxConnIdleTime   = time.Minute * 30
+	defaultHealthCheckPeriod = time.Minute
+	defaultConnectTimeout    = time.Second * 5
+)
 
-	const defaultMaxConns = int32(4)
-	const defaultMinConns = int32(0)
-	const defaultMaxConnLifetime = time.Hour
-	const defaultMaxConnIdleTime = time.Minute * 30
-	const defaultHealthCheckPeriod = time.Minute
-	const defaultConnectTimeout = time.Second * 5
+func InitDB() (*pgxpool.Pool, error) {
 
 	connStr := EnvVars.DBUrl
 
