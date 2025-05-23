@@ -44,16 +44,6 @@ func FetchUserAccount(c *gin.Context) {
 		pkg.DbError(c, err)
 		return
 	}
-	if userProfile.Ghusername == "" {
-		// Could not locate profile despite valid token ???
-		cmd.Log.Warn(
-			fmt.Sprintf("Failed to retrive user profile at %s %s",
-				c.Request.Method, c.FullPath()))
-		c.JSON(http.StatusForbidden, gin.H{
-			"message": "Server refused to process request",
-		})
-		return
-	}
 
 	userBadges, err := q.FetchBadgesQuery(ctx, conn, username)
 	if err != nil {

@@ -222,15 +222,6 @@ func RegisterUserOtpResend(c *gin.Context) {
 		pkg.DbError(c, err)
 		return
 	}
-	if result.Email == "" {
-		cmd.Log.Info(
-			fmt.Sprintf("OTP not found as time elapsed at %s %s",
-				c.Request.Method, c.FullPath()))
-		c.JSON(http.StatusNotFound, gin.H{
-			"message": "Time elapsed for resend. Please try again.",
-		})
-		return
-	}
 
 	err = pkg.SendMail([]string{result.Email}, result.Otp)
 	if err != nil {
