@@ -41,6 +41,9 @@ func JSONUnmarshallError(c *gin.Context, err error) {
 			c.Request.Method,
 			c.FullPath(),
 		), err)
+	c.JSON(http.StatusBadRequest, gin.H{
+		"message": "The request is malformed",
+	})
 	return
 }
 
