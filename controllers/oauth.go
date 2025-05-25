@@ -138,14 +138,18 @@ func CompleteGitHubOAuth(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message":         "User login successful",
-		"access_token":    accessToken,
-		"refresh_token":   refreshToken,
-		"github_username": loginUser.Ghusername,
-		"email":           loginUser.Email,
-		"bounty":          loginUser.Bounty,
-	})
+	// Redirect back to frontend with tokens
+	frontendURL := fmt.Sprintf("%s/auth/callback", cmd.EnvVars.FrontendUrl)
+	redirectURL := fmt.Sprintf("%s?access_token=%s&refresh_token=%s&github_username=%s&email=%s&bounty=%d",
+		frontendURL,
+		accessToken,
+		refreshToken,
+		loginUser.Ghusername,
+		loginUser.Email,
+		loginUser.Bounty,
+	)
+
+	c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 	cmd.Log.Info(fmt.Sprintf(
 		"[SUCCESS]: Processed request at %s %s",
 		c.Request.Method, c.FullPath(),

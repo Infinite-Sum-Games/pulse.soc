@@ -24,6 +24,7 @@ type EnvConfig struct {
 	GhClientId     string // github
 	GhClientSecret string
 	GhRedirectUrl  string
+	FrontendUrl    string
 }
 
 func NewEnvConfig() (*EnvConfig, error) {
@@ -46,6 +47,7 @@ func NewEnvConfig() (*EnvConfig, error) {
 	ghClientId := os.Getenv("GITHUB_CLIENT_ID")
 	ghClientSecret := os.Getenv("GITHUB_CLIENT_SECRET")
 	ghRedirectUrl := os.Getenv("GITHUB_REDIRECT_URL")
+	frontendUrl := os.Getenv("FRONTEND_URL")
 
 	// Environment
 	environment = strings.ToLower(environment)
@@ -110,6 +112,11 @@ func NewEnvConfig() (*EnvConfig, error) {
 		return nil, fmt.Errorf("GITHUB_REDIRECT_URL environment variable is missing.")
 	}
 	cfg.GhRedirectUrl = ghRedirectUrl
+	// Frontend URL
+	if frontendUrl == "" {
+		return nil, fmt.Errorf("FRONTEND_URL environment variable is missing.")
+	}
+	cfg.FrontendUrl = frontendUrl
 
 	return cfg, nil
 }
