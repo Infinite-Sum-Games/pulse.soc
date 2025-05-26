@@ -19,13 +19,13 @@ import (
 func StartApp() {
 	failMsg := "Could not initialize app\n%w"
 
-	// Initialize global environment variables
-	env, err := cmd.NewEnvConfig()
+	// Initialize configuration
+	config, err := cmd.LoadConfig()
 	if err != nil {
 		panic(fmt.Errorf(failMsg, err))
 	}
-	cmd.EnvVars = env
-	log.Println("[OK]: Environment variables configured successfully")
+	cmd.AppConfig = config
+	log.Println("[OK]: Configuration loaded successfully")
 
 	// Initialize logger
 	f, err := os.OpenFile("app.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -33,7 +33,7 @@ func StartApp() {
 		panic(fmt.Errorf(failMsg, err))
 	}
 	defer f.Close()
-	cmd.Log = cmd.NewLoggerService(cmd.EnvVars.Environment, f)
+	cmd.Log = cmd.NewLoggerService(cmd.AppConfig.Environment, f)
 	cmd.Log.Info("[OK]: Logging service configured successfully.")
 
 	// Initialize database connection pool
@@ -96,7 +96,7 @@ func StartApp() {
 	v1.GET("/issues/:projectId", mw.Auth, c.FetchIssues)
 	v1.GET("/updates/live", mw.Auth, c.FetchLiveUpdates)
 
-	port := strconv.Itoa(cmd.EnvVars.Port)
+	port := strconv.Itoa(cmd.AppConfig.Port)
 	cmd.Log.Info("[OK]: Server configured and starting on PORT " + port)
 	err = router.Run(":" + port)
 	if err != nil {

@@ -1,0 +1,23 @@
+# Server Configuration
+environment = "development" # Options: development, testing, production
+port = 9000
+frontend_url = ""
+
+# Database Configuration
+database_url = "postgres://user:password@localhost:5432/dbname"
+
+# JWT Configuration
+jwt_secret = "your-jwt-secret-key"
+
+# SMTP Configuration
+[smtp]
+host = "smtp.gmail.com"
+port = 587
+username = "your.email@gmail.com"
+app_password = "your-gmail-app-password"
+
+# GitHub OAuth Configuration
+[github]
+client_id = "your-github-client-id"
+client_secret = "your-github-client-secret"
+redirect_url = "http://localhost:9000/api/v1/auth/github/callback" 

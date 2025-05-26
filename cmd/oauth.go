@@ -9,9 +9,9 @@ var GithubOAuthConfig *oauth2.Config
 
 func OAuthInit() {
 	cfg := &oauth2.Config{
-		ClientID:     EnvVars.GhClientId,
-		ClientSecret: EnvVars.GhClientSecret,
-		RedirectURL:  EnvVars.GhRedirectUrl,
+		ClientID:     AppConfig.GitHub.ClientID,
+		ClientSecret: AppConfig.GitHub.ClientSecret,
+		RedirectURL:  AppConfig.GitHub.RedirectURL,
 		Scopes:       []string{"user:email", "read:user"},
 		Endpoint:     github.Endpoint,
 	}

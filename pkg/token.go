@@ -15,12 +15,10 @@ func CreateToken(ghUsername, email, tokenType string) (string, error) {
 		expiryAt = time.Now().Add(5 * time.Minute)
 	case "access_token":
 		expiryAt = time.Now().Add(1 * time.Hour)
-		break
 	case "refresh_token":
 		expiryAt = time.Now().Add(90 * 24 * time.Hour)
-		break
 	default:
-		return "", fmt.Errorf("Invalid tokenType provided. Valid types: %s, %s or %s",
+		return "", fmt.Errorf("invalid tokenType provided. valid types: %s, %s or %s",
 			"temp_token", "access_token", "refresh_token")
 	}
 
@@ -34,7 +32,7 @@ func CreateToken(ghUsername, email, tokenType string) (string, error) {
 			Subject:   tokenType,
 		})
 
-	tokenString, err := token.SignedString([]byte(cmd.EnvVars.TokenSecret))
+	tokenString, err := token.SignedString([]byte(cmd.AppConfig.JWTSecret))
 	if err != nil {
 		return "", err
 	}
@@ -48,23 +46,23 @@ func VerifyToken(tokenString string) (*jwt.RegisteredClaims, error) {
 		claims,
 		func(token *jwt.Token) (any, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			}
-			return []byte(cmd.EnvVars.TokenSecret), nil
+			return []byte(cmd.AppConfig.JWTSecret), nil
 		})
 
 	if err != nil {
-		return nil, fmt.Errorf("Token parsing error: %s", err)
+		return nil, fmt.Errorf("token parsing error: %s", err)
 	}
 
 	if !token.Valid {
-		return nil, fmt.Errorf("Invalid token")
+		return nil, fmt.Errorf("invalid token")
 	}
 	if claims, ok := token.Claims.(*jwt.RegisteredClaims); ok {
 		if claims.ExpiresAt != nil && claims.ExpiresAt.Before(time.Now()) {
-			return nil, fmt.Errorf("Token expires")
+			return nil, fmt.Errorf("token expired")
 		}
 		return claims, nil
 	}
-	return nil, fmt.Errorf("Invalid token claims type")
+	return nil, fmt.Errorf("invalid token claims type")
 }
