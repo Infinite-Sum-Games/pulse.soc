@@ -62,7 +62,7 @@ func StartApp() {
 	router.Use(mw.RecoveryMiddleware)
 	router.Use(gin.Logger())
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{cmd.EnvVars.FrontendUrl},
+		AllowOrigins:     []string{cmd.AppConfig.FrontendURL},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},

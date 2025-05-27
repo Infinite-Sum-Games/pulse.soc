@@ -2,6 +2,9 @@
 SELECT
   email,
   ghUsername,
+  first_name,
+  middle_name,
+  last_name,
   bounty
 FROM 
   user_account
@@ -17,4 +20,6 @@ FROM
   badge_dispatch
 WHERE
   ghUsername = $1;
+
+-- name: FetchStatsQuery :one
 

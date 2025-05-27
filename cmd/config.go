@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -63,14 +64,8 @@ func LoadConfig() (*Config, error) {
 
 func validateConfig(config *Config) error {
 	validEnvs := []string{"development", "testing", "production"}
-	isValidEnv := false
-	for _, env := range validEnvs {
-		if strings.ToLower(config.Environment) == env {
-			isValidEnv = true
-			break
-		}
-	}
-	if !isValidEnv {
+	result := slices.Contains(validEnvs, config.Environment)
+	if !result {
 		return fmt.Errorf("invalid environment: %s", config.Environment)
 	}
 
