@@ -3,8 +3,8 @@ tmp/
 bin/
 
 # Ignoring environment variables
-.env
 config.toml
+config.toml.prod
 
 # Ignoring generated files
 db/gen
