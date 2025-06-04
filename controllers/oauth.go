@@ -139,7 +139,7 @@ func CompleteGitHubOAuth(c *gin.Context) {
 	}
 
 	// Redirect back to frontend with tokens
-	frontendURL := fmt.Sprintf("%s/auth/callback", cmd.EnvVars.FrontendUrl)
+	frontendURL := fmt.Sprintf("%s/auth/callback", cmd.AppConfig.FrontendURL)
 	redirectURL := fmt.Sprintf("%s?access_token=%s&refresh_token=%s&github_username=%s&email=%s&bounty=%d",
 		frontendURL,
 		accessToken,
