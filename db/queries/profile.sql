@@ -1,25 +1,34 @@
 -- name: FetchProfileQuery :one
 SELECT
-  email,
-  ghUsername,
-  first_name,
-  middle_name,
-  last_name,
-  bounty
+  ua.email,
+  ua.ghUsername,
+  ua.first_name,
+  ua.middle_name,
+  ua.last_name,
+  ua.bounty,
+  COUNT(DISTINCT s.id) as solution_count,
+  COUNT(DISTINCT ic.id) as active_claims
 FROM 
-  user_account
+  user_account ua
+LEFT JOIN solutions s ON s.ghUsername = ua.ghUsername
+LEFT JOIN issue_claims ic ON ic.ghUsername = ua.ghUsername
+LEFT JOIN issues i ON i.id = ic.issue_id AND i.resolved = false AND ic.elapsed_on > NOW()
 WHERE
-  status = true
-  AND ghUsername = $1;
+  ua.status = true
+  AND ua.ghUsername = $1
+GROUP BY
+  ua.email,
+  ua.ghUsername,
+  ua.first_name,
+  ua.middle_name,
+  ua.last_name,
+  ua.bounty;
   
 -- name: FetchBadgesQuery :many
 SELECT
-  badge_id, 
+  badge_name, 
   awarded_at
 FROM 
   badge_dispatch
 WHERE
   ghUsername = $1;
-
--- name: FetchStatsQuery :one
-
