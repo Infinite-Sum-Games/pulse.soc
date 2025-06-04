@@ -1,0 +1,17 @@
+# Ignore binaries
+tmp/
+bin/
+
+# Ignoring environment variables
+config.toml
+config.toml.prod
+
+# Ignoring generated files
+db/gen
+
+# Ignoring RSA and log files
+*.log
+*.rsa
+
+# Added by goreleased init:
+dist/
