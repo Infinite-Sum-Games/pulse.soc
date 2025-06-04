@@ -2,11 +2,13 @@ package pkg
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/IAmRiteshKoushik/pulse/cmd"
+	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -24,6 +26,8 @@ const (
 	FlutterRank = "flutter-ranking-sset"
 	KotlinRank  = "kotlin-ranking-sset"
 	HaskellRank = "haskell-ranking-sset"
+
+	LiveUpdateStream = "live-update-stream"
 )
 
 func GetParticipantRank(username string) (int64, error) {
@@ -133,4 +137,41 @@ func GetTopParticipants() (map[string]map[string]Participant, error) {
 		}
 	}
 	return results, err
+}
+
+type LiveUpdate struct {
+	Username  string `json:"github_username"`
+	Message   string `json:"message"`
+	Timestamp int64  `json:"time"` // time is in unix.milliseconds for less size
+}
+
+func GetLatestLiveEvents(c *gin.Context) ([]LiveUpdate, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	events, err := Valkey.XRevRangeN(ctx, LiveUpdateStream, "+", "-", 5).Result()
+	if err != nil {
+		return nil, err
+	}
+	if len(events) == 0 {
+		return []LiveUpdate{}, nil
+	}
+
+	result := []LiveUpdate{}
+	for _, event := range events {
+		data, ok := event.Values["data"].(string)
+		if !ok {
+			cmd.Log.Fatal("Malformed events in Live-Update Stream.",
+				fmt.Errorf("event entry is not in string format"))
+			continue // skipping malformed events (should not happen though)
+		}
+		var entry LiveUpdate
+		if err := json.Unmarshal([]byte(data), &entry); err != nil {
+			cmd.Log.Fatal("Malformed events in Live-Update Stream.", err)
+			continue // skipping malformed events (shouldn't happen)
+		}
+		result = append(result, entry)
+	}
+
+	return result, nil
 }
