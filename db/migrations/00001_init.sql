@@ -18,6 +18,9 @@ CREATE TABLE IF NOT EXISTS maintainers(
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS user_account(
   id SERIAL NOT NULL,
+  first_name TEXT NOT NULL,
+  middle_name TEXT,
+  last_name TEXT NOT NULL,
   email TEXT NOT NULL,
   ghUsername TEXT NOT NULL UNIQUE,
   status BOOLEAN DEFAULT true,
@@ -33,6 +36,9 @@ CREATE TABLE IF NOT EXISTS user_account(
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS user_onboarding(
   id SERIAL NOT NULL,
+  first_name TEXT NOT NULL,
+  middle_name TEXT,
+  last_name TEXT NOT NULL,
   email TEXT NOT NULL,
   ghUsername TEXT NOT NULL,
   otp TEXT NOT NULL,
@@ -45,10 +51,10 @@ CREATE TABLE IF NOT EXISTS user_onboarding(
 
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS repository(
-  id UUID NOT NULL,
+  id UUID DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   description TEXT NOT NULL,
-  url TEXT NOT NULL,
+  url TEXT NOT NULL UNIQUE,
   maintainers TEXT[],
   tags TEXT[],
   is_internal BOOLEAN DEFAULT false,
@@ -61,22 +67,28 @@ CREATE TABLE IF NOT EXISTS repository(
 
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS issues(
-  id UUID NOT NULL,
+  id UUID DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   repoId UUID NOT NULL,
   url TEXT NOT NULL UNIQUE,
+  tags TEXT[],
+  difficulty TEXT DEFAULT 'Easy',
   resolved BOOLEAN DEFAULT false,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW(),
 
-  CONSTRAINT "issues_pkey" PRIMARY KEY (id)
-  -- CONSTRAINT "issues_repoid_fkey"
+  CONSTRAINT "issues_pkey" PRIMARY KEY (id),
+  CONSTRAINT "issues_repoid_fkey"
+    FOREIGN KEY (repoId)
+      REFERENCES repository(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
 -- +goose StatementEnd
 
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS issue_claims(
-  id SERIAL NOT NULL,
+  id UUID DEFAULT gen_random_uuid(),
   ghUsername TEXT NOT NULL,
   issue_id UUID NOT NULL,
   claimed_on TIMESTAMP NOT NULL,
@@ -84,6 +96,30 @@ CREATE TABLE IF NOT EXISTS issue_claims(
 
   CONSTRAINT "issue_claims_pkey" PRIMARY KEY (id),
   CONSTRAINT "issue_claims_ghUsername_fkey"
+    FOREIGN KEY (ghUsername)
+      REFERENCES user_account(ghUsername)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
+);
+-- +goose StatementEnd
+
+-- +goose StatementBegin
+CREATE TABLE IF NOT EXISTS solutions(
+  id SERIAL NOT NULL,
+  url TEXT NOT NULL,
+  repo_id TEXT NOT NULL,
+  ghUsername TEXT NOT NULL,
+  is_merged BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+
+  CONSTRAINT "solutions_pkey" PRIMARY KEY (id),
+  CONSTRAINT "solutions_repo_id_fkey" 
+    FOREIGN KEY (repo_id)
+      REFERENCES repository(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+  CONSTRAINT "solutions_ghUsername_fkey"
     FOREIGN KEY (ghUsername)
       REFERENCES user_account(ghUsername)
         ON DELETE RESTRICT
@@ -122,10 +158,9 @@ CREATE TABLE IF NOT EXISTS bounty_log(
 
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS badge_info(
-  id UUID NOT NULL,
-  name TEXT NOT NULL,
+  id SERIAL NOT NULL,
+  name TEXT NOT NULL UNIQUE,
   description TEXT NOT NULL,
-  won_by INTEGER DEFAULT 0,
 
   CONSTRAINT "badge_info_pkey" PRIMARY KEY (id)
 );
@@ -135,11 +170,20 @@ CREATE TABLE IF NOT EXISTS badge_info(
 CREATE TABLE IF NOT EXISTS badge_dispatch(
   id SERIAL NOT NULL,
   ghUsername TEXT NOT NULL,
-  badge_id UUID NOT NULL,
+  badge_name TEXT NOT NULL,
   awarded_at TIMESTAMP DEFAULT NOW(),
 
   CONSTRAINT "badge_dispatch_pkey" PRIMARY KEY (id),
-  CONSTRAINT "badge_dispatch_uniqueness_validator" UNIQUE (ghUsername, badge_id)
+  CONSTRAINT "badge_dispatch_ghUsername_fkey"
+    FOREIGN KEY (ghUsername)
+      REFERENCES user_account(ghUsername)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+  CONSTRAINT "badge_dispatch_badge_name_fkey" 
+    FOREIGN KEY (badge_name)
+      REFERENCES badge_info(name)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
 -- +goose StatementEnd
 
