@@ -2,27 +2,27 @@
 
 -- +goose StatementBegin
 -- All badge related metadata is to be found here.
-INSERT INTO badge_info (id, name, description) VALUES
-(gen_random_uuid(), 'Hello, Tinkerer', '1 Pull Requests merged'),
-(gen_random_uuid(), 'Ninja Contributor', '5 Pull Requests merged'),
-(gen_random_uuid(), 'Engineer Overclocked', '10 Pull Requests merged'),
-(gen_random_uuid(), 'Doomguy', '20 Pull Requests merged'),
-(gen_random_uuid(), 'Sanitizer', 'Get 1 bug reports accepted'),
-(gen_random_uuid(), 'Pest Control', 'Get 5 bug reports accepted'),
-(gen_random_uuid(), 'Planet Cleanser', 'Get 10 bug reports accepted'),
-(gen_random_uuid(), 'Polygot', 'Contribute in 3 different languages'),
-(gen_random_uuid(), 'Jack of All Stacks', 'Contribute in 5 different languages'),
-(gen_random_uuid(), 'The Scholar', 'Help out 1 person in SoC comms'),
-(gen_random_uuid(), 'The Gulliver', 'Help out 3 people in SoC comms'),
-(gen_random_uuid(), 'The Oracle', 'Help out 5 people in SoC comms'),
-(gen_random_uuid(), 'Lab Assistant', 'Get 1 testing related Pull Requests merged'),
-(gen_random_uuid(), 'Quality Assurer', 'Get 5 testing related Pull Requests merged'),
-(gen_random_uuid(), 'Full-Coded Alchemist', 'Get 10 testing related Requests merged'),
-(gen_random_uuid(), 'High Charity', 'Get 2 feature suggestions accepted'),
-(gen_random_uuid(), 'Zeppelin of Mighty Gargantuaness (ZOMG)', 'Get a PR marked for High-Impact'),
-(gen_random_uuid(), 'Doc Champ', 'Get 2 documentation Pull Requests merged'),
-(gen_random_uuid(), 'Pirate of Issue-bians', 'Contribute to 10 issues in the same language'),
-(gen_random_uuid(), 'Enamoured', 'Got a PR accepted every week for a month');
+INSERT INTO badge_info (name, description) VALUES
+('Hello, Tinkerer', '1 Pull Requests merged'),
+('Ninja Contributor', '5 Pull Requests merged'),
+('Engineer Overclocked', '10 Pull Requests merged'),
+('Doomguy', '20 Pull Requests merged'),
+('Sanitizer', 'Get 1 bug reports accepted'),
+('Pest Control', 'Get 5 bug reports accepted'),
+('Planet Cleanser', 'Get 10 bug reports accepted'),
+('Polygot', 'Contribute in 3 different languages'),
+('Jack of All Stacks', 'Contribute in 5 different languages'),
+('The Scholar', 'Help out 1 person in SoC comms'),
+('The Gulliver', 'Help out 3 people in SoC comms'),
+('The Oracle', 'Help out 5 people in SoC comms'),
+('Lab Assistant', 'Get 1 testing related Pull Requests merged'),
+('Quality Assurer', 'Get 5 testing related Pull Requests merged'),
+('Full-Coded Alchemist', 'Get 10 testing related Requests merged'),
+('High Charity', 'Get 2 feature suggestions accepted'),
+('Zeppelin of Mighty Gargantuaness (ZOMG)', 'Get a PR marked for High-Impact'),
+('Doc Champ', 'Get 2 documentation Pull Requests merged'),
+('Pirate of Issue-bians', 'Contribute to 10 issues in the same language'),
+('Enamoured', 'Got a PR accepted every week for a month');
 -- +goose StatementEnd
 
 -- +goose StatementBegin
