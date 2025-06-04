@@ -44,7 +44,6 @@ func JSONUnmarshallError(c *gin.Context, err error) {
 	c.JSON(http.StatusBadRequest, gin.H{
 		"message": "The request is malformed",
 	})
-	return
 }
 
 func RequestValidatorError(c *gin.Context, err error) {
@@ -57,5 +56,4 @@ func RequestValidatorError(c *gin.Context, err error) {
 	c.JSON(http.StatusBadRequest, gin.H{
 		"error": "The request is malformed.",
 	})
-	return
 }

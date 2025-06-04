@@ -8,7 +8,7 @@ import (
 
 func GrabUsername(c *gin.Context) (string, bool) {
 	username, ok := c.Get("username")
-	if ok != true {
+	if !ok {
 		return "", ok
 	}
 	if fmt.Sprintf("%T", username) == "string" {
