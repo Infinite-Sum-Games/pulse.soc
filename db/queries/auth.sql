@@ -53,12 +53,15 @@ WHERE
 INSERT INTO 
   user_onboarding
   (
+    first_name,
+    middle_name,
+    last_name,
     email,
     ghUsername,
     otp,
     expiry_at
   )
-VALUES ($1, $2, $3, NOW() + INTERVAL '5 minutes')
+VALUES ($1, $2, $3, $4, $5, $6, NOW() + INTERVAL '7 minutes')
 RETURNING
   email, otp;
 
@@ -70,15 +73,18 @@ WHERE
   AND otp = $2
   AND expiry_at > NOW()
 RETURNING
-  email, ghUsername;
+  first_name, middle_name, last_name, email, ghUsername;
 
 -- name: CreateUserAccountQuery :one
 INSERT INTO
   user_account
   (
+    first_name,
+    middle_name,
+    last_name,
     email,
     ghUsername
   )
-VALUES ($1, $2)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING
   ghUsername;
