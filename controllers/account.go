@@ -45,18 +45,33 @@ func FetchUserAccount(c *gin.Context) {
 		return
 	}
 
-	userBadges, err := q.FetchBadgesQuery(ctx, conn, username)
+	rank, err := pkg.GetParticipantRank(username)
 	if err != nil {
-		pkg.DbError(c, err)
+		cmd.Log.Error(
+			fmt.Sprintf("Failed to fetch rank at %s %s",
+				c.Request.Method,
+				c.FullPath(),
+			),
+			err,
+		)
 		return
 	}
 
 	cmd.Log.Info(
-		fmt.Sprintf("Successfully retrived user profile at %s %s", c.Request.Method, c.FullPath()))
+		fmt.Sprintf("Successfully retrived user profile at %s %s",
+			c.Request.Method, c.FullPath(),
+		),
+	)
 	c.JSON(http.StatusOK, gin.H{
-		"message": "User profile retrived successfully",
-		"profile": userProfile,
-		"badges":  userBadges,
+		"message":             "User profile retrived successfully",
+		"github_username":     userProfile.Ghusername,
+		"first_name":          userProfile.FirstName,
+		"middle_name":         userProfile.MiddleName.String,
+		"last_name":           userProfile.LastName,
+		"bounty":              userProfile.Bounty,
+		"pull_request_count":  userProfile.SolutionCount,
+		"pending_issue_count": userProfile.ActiveClaims,
+		"rank":                rank,
+		"badges":              userProfile.Badges,
 	})
-	return
 }
