@@ -1,12 +1,8 @@
 # Server Configuration
 environment = "development" # Options: development, testing, production
 port = 9000
-frontend_url = ""
-
-# Database Configuration
+frontend_url = "http://localhost:3000"
 database_url = "postgres://user:password@localhost:5432/dbname"
-
-# JWT Configuration
 jwt_secret = "your-jwt-secret-key"
 
 # SMTP Configuration

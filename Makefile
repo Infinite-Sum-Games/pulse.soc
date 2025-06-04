@@ -16,3 +16,7 @@ seed:
 
 down:
 	@goose -dir ./db/migrations/ -no-versioning down
+
+dev:
+	@podman compose down
+	@podman compose up -d
