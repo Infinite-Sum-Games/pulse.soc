@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS issue_claims(
 CREATE TABLE IF NOT EXISTS solutions(
   id SERIAL NOT NULL,
   url TEXT NOT NULL,
-  repo_id TEXT NOT NULL,
+  repo_id UUID NOT NULL,
   ghUsername TEXT NOT NULL,
   is_merged BOOLEAN DEFAULT false,
   created_at TIMESTAMP DEFAULT NOW(),
