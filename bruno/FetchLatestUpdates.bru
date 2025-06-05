@@ -1,0 +1,11 @@
+meta {
+  name: FetchLatestUpdates
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/updates/latest
+  body: none
+  auth: inherit
+}
