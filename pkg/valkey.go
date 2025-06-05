@@ -140,9 +140,11 @@ func GetTopParticipants() (map[string]map[string]Participant, error) {
 }
 
 type LiveUpdate struct {
+	ID        string `json:"id"` // TODO: Grab id from Redis stream
 	Username  string `json:"github_username"`
 	Message   string `json:"message"`
-	Timestamp int64  `json:"time"` // time is in unix.milliseconds for less size
+	EventType string `json:"event_type"` // TODO: Bounty, Issue, Top-3
+	Timestamp int64  `json:"time"`       // time is in unix.milliseconds for less size
 }
 
 func GetLatestLiveEvents(c *gin.Context) ([]LiveUpdate, error) {

@@ -102,7 +102,7 @@ func StartApp() {
 	v1.GET("/leaderboard", mw.Auth, c.FetchLeaderboard)
 	v1.GET("/projects", mw.Auth, c.FetchProjects)
 	v1.GET("/issues/:projectId", mw.Auth, c.FetchIssues)
-	v1.GET("/updates/latest", mw.Auth, c.FetchLatestUpdates)
+	v1.GET("/updates/latest", c.FetchLatestUpdates)
 	v1.GET("/updates/live", mw.Auth, c.SetupLiveUpdates)
 
 	port := strconv.Itoa(cmd.AppConfig.Port)

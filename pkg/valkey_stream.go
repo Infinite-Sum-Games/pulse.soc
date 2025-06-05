@@ -38,11 +38,14 @@ func ReadStream(ctx context.Context, lv *sse.LiveServer) {
 		for _, stream := range streams {
 			for _, message := range stream.Messages {
 				lastID = message.ID
-
-				// Marshalling as JSON string
-				var data string
-				liveUpdate := fmt.Sprintf("data: %s\n\n", data)
-				lv.Broadcast <- liveUpdate
+				for _, val := range message.Values {
+					data, ok := val.(string)
+					if !ok {
+						continue
+					}
+					liveUpdate := fmt.Sprintf("data: %s\n\n", data)
+					lv.Broadcast <- liveUpdate
+				}
 			}
 		}
 	}
