@@ -99,9 +99,10 @@ func StartApp() {
 	v1.GET("/auth/refresh", c.RegenerateToken)
 
 	v1.GET("/profile", mw.Auth, c.FetchUserAccount)
-	v1.GET("/leaderboard", mw.Auth, c.FetchLeaderboard)
-	v1.GET("/projects", mw.Auth, c.FetchProjects)
-	v1.GET("/issues/:projectId", mw.Auth, c.FetchIssues)
+	v1.GET("/leaderboard", c.FetchLeaderboard)
+	v1.GET("/registrations", c.FetchRegistrationBoard)
+	v1.GET("/projects", c.FetchProjects)
+	v1.GET("/issues/:projectId", c.FetchIssues)
 	v1.GET("/updates/latest", c.FetchLatestUpdates)
 	v1.GET("/updates/live", mw.Auth, c.SetupLiveUpdates)
 

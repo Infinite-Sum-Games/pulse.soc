@@ -22,7 +22,7 @@ func FetchProjects(c *gin.Context) {
 		pkg.DbError(c, err)
 		return
 	}
-	conn.Release()
+	defer conn.Release()
 
 	q := db.New()
 	results, err := q.FetchAllProjectsQuery(ctx, conn)
