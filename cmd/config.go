@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Config struct {
+type EnvConfig struct {
 	Environment string `mapstructure:"environment"`
 	Port        int    `mapstructure:"port"`
 	DatabaseURL string `mapstructure:"database_url"`
@@ -34,10 +34,10 @@ type Config struct {
 	} `mapstructure:"github"`
 }
 
-var AppConfig *Config
+var AppConfig *EnvConfig
 
 // LoadConfig reads configuration from config.toml file
-func LoadConfig() (*Config, error) {
+func LoadConfig() (*EnvConfig, error) {
 	viper.SetConfigName("config")
 	viper.SetConfigType("toml")
 	viper.AddConfigPath(".")
@@ -54,7 +54,7 @@ func LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("error reading config file: %w", err)
 	}
 
-	config := &Config{}
+	config := &EnvConfig{}
 	if err := viper.Unmarshal(config); err != nil {
 		return nil, fmt.Errorf("unable to decode config into struct: %w", err)
 	}
@@ -67,27 +67,33 @@ func LoadConfig() (*Config, error) {
 	return config, nil
 }
 
-func validateConfig(config *Config) error {
+func validateConfig(config *EnvConfig) error {
 	validEnvs := []string{"development", "testing", "production"}
 	result := slices.Contains(validEnvs, config.Environment)
+
+	// Validate server and database configurations
 	if !result {
 		return fmt.Errorf("invalid environment: %s", config.Environment)
 	}
-
 	if config.Port <= 0 {
 		return fmt.Errorf("invalid port number")
 	}
-
 	if config.DatabaseURL == "" {
 		return fmt.Errorf("database URL is required")
 	}
-
 	if config.JWTSecret == "" {
 		return fmt.Errorf("JWT secret is required")
 	}
-
 	if config.FrontendURL == "" {
-		return fmt.Errorf("Frontend URL is required")
+		return fmt.Errorf("frontend URL is required")
+	}
+
+	// Validate Valkey configuration
+	if config.Valkey.Host == "" {
+		return fmt.Errorf("valkey host is required")
+	}
+	if config.Valkey.Port <= 0 {
+		return fmt.Errorf("invalid Valkey port")
 	}
 
 	// Validate SMTP configuration
