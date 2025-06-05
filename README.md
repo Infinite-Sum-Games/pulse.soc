@@ -65,10 +65,31 @@ the setup instructions remain the same, but need to be tailored to Windows.
 1. For testing the API, download [Bruno - API Client](https://www.usebruno.com/)
 2. Open the `bruno/` folder in this repository using Bruno.
 3. Run individual requests.
+4. For checking LIVE updates, check `Makefile` and populate Valkey / Redis 
+accordingly.
+5. A sample event to test the LIVE update are as follows:
+```bash
+# Use the Redis-CLI or Redis-Insight on localhost:5540 to add the following
+# Add a few sample events to the live-update-stream
 
-> There are scripts in place which automatically populate the Authorization 
-header for requests after the `Login Request`. You do not have to additionally 
-take the token and supply it in reach request manually.
+# Sample 1
+redis-cli XADD live-update-stream * data '{
+  "github_username": "IAmRiteshKoushik",
+  "message": "IAmRiteshKoushik claimed a bounty worth 500 points!", 
+  "event_type": "Bounty",
+  "time": 1703764533000
+}'
+
+# Sample 2
+redis-cli XADD live-update-stream * data '{
+  "github_username": "vijay-sb",
+  "message": "vijay-sb claimed a bounty worth 700 points!", 
+  "event_type": "Bounty",
+  "time": 1703764533000
+}'
+```
+
+
 
 ### Authors
 This application has been built and tested by [Ritesh Koushik](https://github.com/IAmRiteshKoushik).
