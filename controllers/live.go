@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/IAmRiteshKoushik/pulse/cmd"
 	"github.com/IAmRiteshKoushik/pulse/pkg"
@@ -42,6 +43,14 @@ func FetchLatestUpdates(c *gin.Context) {
 // Handle server-sent-events with broadcast to multiple connections
 // simulatenously from a Redis stream
 func SetupLiveUpdates(c *gin.Context) {
+	// Setup SSE-specific headers
+	c.Writer.Header().Set("Content-Type", "text/event-stream")
+	c.Writer.Header().Set("Cache-Control", "no-cache")
+	c.Writer.Header().Set("Connection", "keep-alive")
+	c.Writer.Header().Set("X-Accel-Buffering", "no")
+
+	keepAlive := time.NewTicker(15 * time.Second)
+	defer keepAlive.Stop()
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "LIVE updates are a work-in-progress",
