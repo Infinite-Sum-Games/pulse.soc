@@ -154,7 +154,6 @@ func CompleteGitHubOAuth(c *gin.Context) {
 		"[SUCCESS]: Processed request at %s %s",
 		c.Request.Method, c.FullPath(),
 	))
-	return
 }
 
 func RegenerateToken(c *gin.Context) {
@@ -246,5 +245,4 @@ func RegenerateToken(c *gin.Context) {
 		"[SUCCESS]: Processed request at %s %s",
 		c.Request.Method, c.FullPath(),
 	))
-	return
 }

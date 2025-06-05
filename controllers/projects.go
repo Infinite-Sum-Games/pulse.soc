@@ -39,7 +39,6 @@ func FetchProjects(c *gin.Context) {
 		"[SUCCESS]: Processed request at %s %s",
 		c.Request.Method, c.FullPath(),
 	))
-	return
 }
 
 func FetchIssues(c *gin.Context) {
@@ -95,5 +94,4 @@ func FetchIssues(c *gin.Context) {
 		"[SUCCESS]: Processed request at %s %s",
 		c.Request.Method, c.FullPath(),
 	))
-	return
 }

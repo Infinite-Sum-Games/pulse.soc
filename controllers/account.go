@@ -14,7 +14,7 @@ import (
 
 func FetchUserAccount(c *gin.Context) {
 	username, ok := pkg.GrabUsername(c)
-	if ok != true {
+	if !ok {
 		cmd.Log.Warn(
 			fmt.Sprintf(
 				"Username did not set in Gin-Context post Authentication at %s %s",

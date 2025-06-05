@@ -107,7 +107,6 @@ func RegisterUserAccount(c *gin.Context) {
 		"[SUCCESS]: Processed request at %s %s",
 		c.Request.Method, c.FullPath(),
 	))
-	return
 }
 
 func RegisterUserOtpVerify(c *gin.Context) {
@@ -191,7 +190,6 @@ func RegisterUserOtpVerify(c *gin.Context) {
 	cmd.Log.Info(fmt.Sprintf(
 		"[SUCCESS]: Processed request at %s %s",
 		c.Request.Method, c.FullPath()))
-	return
 }
 
 func RegisterUserOtpResend(c *gin.Context) {
@@ -241,5 +239,4 @@ func RegisterUserOtpResend(c *gin.Context) {
 		"[SUCCESS]: Processed request at %s %s",
 		c.Request.Method, c.FullPath(),
 	))
-	return
 }
