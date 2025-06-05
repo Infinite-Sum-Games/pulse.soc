@@ -8,6 +8,8 @@ import (
 	"github.com/IAmRiteshKoushik/pulse/cmd"
 )
 
+var Live *LiveServer
+
 type Client struct {
 	Channel chan string
 }
