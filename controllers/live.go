@@ -103,7 +103,7 @@ func SetupLiveUpdates(c *gin.Context) {
 		select {
 		case msg, ok := <-client.Channel:
 			// The message-type can be :
-			// 1. data: <message>/n/n
+			// 1. data: <message>\n\n
 			// 2. : keep-alive\n\n
 			if !ok {
 				// If a client disconnection happens then we close the
