@@ -72,6 +72,16 @@ func SetupLiveUpdates(c *gin.Context) {
 	c.Writer.Header().Set("X-Accel-Buffering", "no")
 
 	// Creating a new client and adding it to the LiveServer
+	// 100 is the number of un-read messages it can queue up
+	// without requiring an immediate receiver. If it is unread
+	// the further sends to this channel will be blocked.
+	// There is a configuration in "sse/sse.go" where the client connection
+	// would be forcibly dropped if it becomes unresponsive for 100
+	// messages. This event can occur if there is network outage / slowdow
+	// on the client side and it is not able to receive it at the servers'
+	// broadcasting rate. If we had used an unbuffered channel then it would
+	// have blocked the server from looping over the entire client-map to
+	// broadcast messages to all clients due to a single unreponsive client.
 	client := &sse.Client{Channel: make(chan string, 100)}
 	sse.Live.Register <- client
 	defer func() {
