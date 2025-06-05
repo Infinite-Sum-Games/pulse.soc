@@ -38,7 +38,7 @@ func NewLoggerService(environment string, file *os.File) *LoggerService {
 		output = zerolog.ConsoleWriter{Out: file, TimeFormat: time.RFC3339}
 
 	} else {
-		panic(errors.New("Could not identify environment"))
+		panic(errors.New("could not identify environment"))
 	}
 
 	logger := zerolog.New(output).With().Timestamp().Logger()

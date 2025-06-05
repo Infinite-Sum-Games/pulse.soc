@@ -24,7 +24,7 @@ func InitDB() (*pgxpool.Pool, error) {
 
 	dbConfig, err := pgxpool.ParseConfig(connStr)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to parse connection string: %w", err)
+		return nil, fmt.Errorf("failed to parse connection string: %w", err)
 	}
 
 	dbConfig.MaxConns = defaultMaxConns
@@ -36,7 +36,7 @@ func InitDB() (*pgxpool.Pool, error) {
 
 	pool, err := pgxpool.NewWithConfig(context.Background(), dbConfig)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to create connection pool: %w", err)
+		return nil, fmt.Errorf("failed to create connection pool: %w", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -44,12 +44,12 @@ func InitDB() (*pgxpool.Pool, error) {
 
 	conn, err := pool.Acquire(ctx) // Acquire a connection to test
 	if err != nil {
-		return nil, fmt.Errorf("Failed to acquire connection from pool: %w", err)
+		return nil, fmt.Errorf("failed to acquire connection from pool: %w", err)
 	}
 	defer conn.Release()
 
 	if err := conn.Ping(ctx); err != nil {
-		return nil, fmt.Errorf("Database connection test failed: %w", err)
+		return nil, fmt.Errorf("database connection test failed: %w", err)
 	}
 	return pool, nil
 }
