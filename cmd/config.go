@@ -15,6 +15,11 @@ type Config struct {
 	JWTSecret   string `mapstructure:"jwt_secret"`
 	FrontendURL string `mapstructure:"frontend_url"`
 
+	Valkey struct {
+		Host string `mapstructure:"host"`
+		Port int    `mapsstructure:"port"`
+	} `mapstructure:"valkey"`
+
 	SMTP struct {
 		Host        string `mapstructure:"host"`
 		Port        int    `mapstructure:"port"`

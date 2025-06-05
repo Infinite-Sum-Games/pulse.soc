@@ -5,17 +5,49 @@ import (
 	"net/http"
 
 	"github.com/IAmRiteshKoushik/pulse/cmd"
+	"github.com/IAmRiteshKoushik/pulse/pkg"
 	"github.com/gin-gonic/gin"
 )
 
-func FetchLiveUpdates(c *gin.Context) {
+// Fetching the latest events before setting up a persistent uni-directional
+// SSE connection
+func FetchLatestUpdates(c *gin.Context) {
+	updates, err := pkg.GetLatestLiveEvents(c)
+	if err != nil {
+		cmd.Log.Error(
+			fmt.Sprintf("Failed to fetch latest updates at %s %s",
+				c.Request.Method,
+				c.FullPath(),
+			),
+			err,
+		)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Oops! Something happened. Please try again later",
+		})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "LIVE Update WIP",
+		"message":      "Latest updates fetches successfully",
+		"updates":      updates,
+		"update_count": len(updates),
+	})
+	cmd.Log.Info(fmt.Sprintf(
+		"[SUCCESS]: Processed request at %s %s",
+		c.Request.Method,
+		c.FullPath(),
+	))
+}
+
+// Handle server-sent-events with broadcast to multiple connections
+// simulatenously from a Redis stream
+func SetupLiveUpdates(c *gin.Context) {
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "LIVE updates are a work-in-progress",
 	})
 	cmd.Log.Info(fmt.Sprintf(
 		"[SUCCESS]: Processed request at %s %s",
 		c.Request.Method, c.FullPath(),
 	))
-	return
 }

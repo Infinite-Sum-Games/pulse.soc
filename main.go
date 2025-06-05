@@ -12,6 +12,7 @@ import (
 	cmd "github.com/IAmRiteshKoushik/pulse/cmd"
 	c "github.com/IAmRiteshKoushik/pulse/controllers"
 	mw "github.com/IAmRiteshKoushik/pulse/middleware"
+	"github.com/IAmRiteshKoushik/pulse/pkg"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -34,23 +35,31 @@ func StartApp() {
 	}
 	defer f.Close()
 	cmd.Log = cmd.NewLoggerService(cmd.AppConfig.Environment, f)
-	cmd.Log.Info("[OK]: Logging service configured successfully.")
+	cmd.Log.Info("[ACTIVE]: Logging service configured successfully.")
 
 	// Initialize database connection pool
 	cmd.DBPool, err = cmd.InitDB()
 	if err != nil {
 		panic(fmt.Errorf(failMsg, err))
 	}
-	cmd.Log.Info("[OK]: DB initialized successfully.")
+	cmd.Log.Info("[ACTIVE]: DB initialized successfully.")
 
 	// Initialize oAuth
 	cmd.OAuthInit()
-	cmd.Log.Info("[OK]: GitHub oAuth configuration loaded successfully.")
+	cmd.Log.Info("[ACTIVE]: GitHub oAuth configuration loaded successfully.")
+
+	// Initialize Valkey
+	client, err := cmd.InitValkey()
+	if err != nil {
+		return
+	}
+	pkg.Valkey = client
+	cmd.Log.Info("[ACTIVE]: Valkey service is online")
 
 	// Starting the server
 	ginLogs, err := os.Create("gin.log")
 	if err != nil {
-		cmd.Log.Fatal("Error creating log file for Gin", err)
+		cmd.Log.Fatal("[CRASH]: Error creating log file for Gin", err)
 	}
 	defer ginLogs.Close()
 	multiWriter := io.MultiWriter(os.Stdout, ginLogs)
@@ -78,7 +87,6 @@ func StartApp() {
 			"[SUCCESS]: Processed request at %s %s",
 			c.Request.Method, c.FullPath(),
 		))
-		return
 	})
 
 	v1 := router.Group("/api/v1")
@@ -94,14 +102,20 @@ func StartApp() {
 	v1.GET("/leaderboard", mw.Auth, c.FetchLeaderboard)
 	v1.GET("/projects", mw.Auth, c.FetchProjects)
 	v1.GET("/issues/:projectId", mw.Auth, c.FetchIssues)
-	v1.GET("/updates/live", mw.Auth, c.FetchLiveUpdates)
+	v1.GET("/updates/latest", mw.Auth, c.FetchLatestUpdates)
+	v1.GET("/updates/live", mw.Auth, c.SetupLiveUpdates)
 
 	port := strconv.Itoa(cmd.AppConfig.Port)
-	cmd.Log.Info("[OK]: Server configured and starting on PORT " + port)
+	cmd.Log.Info("[ACTIVE]: Server configured and starting on PORT " + port)
 	err = router.Run(":" + port)
 	if err != nil {
+		cmd.Log.Fatal("[CRASH]: Server failed to start", err)
 		panic(err)
 	}
+
+	cmd.CloseValkey(pkg.Valkey)
+	cmd.Log.Info("[DEACTIVE]: Valkey offline.")
+	cmd.Log.Info("[DEACTIVE]: Logging service offline.")
 }
 
 func main() {
