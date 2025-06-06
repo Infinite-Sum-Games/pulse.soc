@@ -10,6 +10,7 @@ import (
 	db "github.com/IAmRiteshKoushik/pulse/db/gen"
 	"github.com/IAmRiteshKoushik/pulse/pkg"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 )
 
 func FetchUserAccount(c *gin.Context) {
@@ -47,21 +48,22 @@ func FetchUserAccount(c *gin.Context) {
 
 	rank, err := pkg.GetParticipantRank(username)
 	if err != nil {
-		cmd.Log.Error(
-			fmt.Sprintf("Failed to fetch rank at %s %s",
-				c.Request.Method,
-				c.FullPath(),
-			),
-			err,
+		if err != redis.Nil {
+			cmd.Log.Error(
+				fmt.Sprintf("Failed to fetch rank at %s %s",
+					c.Request.Method,
+					c.FullPath(),
+				),
+				err,
+			)
+			return
+		}
+		cmd.Log.Warn(
+			fmt.Sprintf("Rank does not exist yet at %s %s",
+				c.Request.Method, c.FullPath()),
 		)
-		return
 	}
 
-	cmd.Log.Info(
-		fmt.Sprintf("Successfully retrived user profile at %s %s",
-			c.Request.Method, c.FullPath(),
-		),
-	)
 	c.JSON(http.StatusOK, gin.H{
 		"message":             "User profile retrived successfully",
 		"github_username":     userProfile.Ghusername,
@@ -74,4 +76,9 @@ func FetchUserAccount(c *gin.Context) {
 		"rank":                rank,
 		"badges":              userProfile.Badges,
 	})
+	cmd.Log.Info(
+		fmt.Sprintf("Successfully retrived user profile at %s %s",
+			c.Request.Method, c.FullPath(),
+		),
+	)
 }
