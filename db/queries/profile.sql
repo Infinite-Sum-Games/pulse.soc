@@ -6,7 +6,8 @@ SELECT
   ua.middle_name,
   ua.last_name,
   ua.bounty,
-  COUNT(DISTINCT s.id) as solution_count,
+  COUNT(DISTINCT CASE WHEN s.is_merged = true THEN s.id END) as solutions_accepted,
+  COUNT(DISTINCT CASE WHEN s.is_merged = false THEN s.id END) as solutions_pending,
   COUNT(DISTINCT ic.id) as active_claims,
   ARRAY_AGG(DISTINCT bd.badge_name) as badges
 FROM 

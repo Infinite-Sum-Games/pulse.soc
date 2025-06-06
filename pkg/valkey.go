@@ -28,6 +28,11 @@ const (
 	KotlinRank  = "kotlin-ranking-sset"
 	HaskellRank = "haskell-ranking-sset"
 
+	DocSet  = "doc-set"
+	BugSet  = "bug-hunter-set"
+	TestSet = "testing-set"
+	FeatSet = "feature-suggestion-set"
+
 	LiveUpdateStream = "live-update-stream"
 )
 
@@ -182,4 +187,60 @@ func GetLatestLiveEvents(c *gin.Context) ([]types.LiveUpdate, error) {
 	}
 
 	return result, nil
+}
+
+func GetParticipantDocCount(username string) (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	count, err := Valkey.HGet(ctx, DocSet, username).Int()
+	if err == redis.Nil {
+		return 0, nil
+	}
+	if err != nil && err != redis.Nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func GetParticipantTestCount(username string) (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	count, err := Valkey.HGet(ctx, TestSet, username).Int()
+	if err == redis.Nil {
+		return 0, nil
+	}
+	if err != nil && err != redis.Nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func GetParticipantFeatCount(username string) (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	count, err := Valkey.HGet(ctx, FeatSet, username).Int()
+	if err == redis.Nil {
+		return 0, nil
+	}
+	if err != nil && err != redis.Nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func GetParticipantBugCount(username string) (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	count, err := Valkey.HGet(ctx, BugSet, username).Int()
+	if err == redis.Nil {
+		return 0, nil
+	}
+	if err != nil && err != redis.Nil {
+		return 0, err
+	}
+	return count, nil
 }
