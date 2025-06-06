@@ -1,0 +1,22 @@
+meta {
+  name: RefreshToken
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/refresh
+  body: none
+  auth: bearer
+}
+
+script:pre-request {
+  const accessKey = bru.getEnvVar("refresh_key");
+  if (accessKey) {
+      const authHeaderValue = `Bearer ${accessKey}`;
+      req.setHeader("Authorization", authHeaderValue);
+      console.log("Authorization header set:", authHeaderValue);
+  } else {
+      console.warn("No 'refresh_key' found in environment variables.");
+  }
+}

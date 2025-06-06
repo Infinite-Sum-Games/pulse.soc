@@ -41,12 +41,21 @@ func FetchRegistrationBoard(c *gin.Context) {
 }
 
 func FetchLeaderboard(c *gin.Context) {
+	leaderboard, err := pkg.GetLeaderboard()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Oops! Something happened. Please try again later.",
+		})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Leaderboard WIP",
+		"message":     "Leaderboard fetched successfully",
+		"leaderboard": leaderboard,
 	})
 	cmd.Log.Info(fmt.Sprintf(
 		"[SUCCESS]: Processed request at %s %s",
 		c.Request.Method, c.FullPath(),
 	))
+
 }

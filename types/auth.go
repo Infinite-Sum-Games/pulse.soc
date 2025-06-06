@@ -56,9 +56,9 @@ func (r *RegisterUserRequest) Validate() error {
 	case http.StatusOK:
 		return nil
 	case http.StatusNotFound:
-		return fmt.Errorf("Invalid GitHub username")
+		return fmt.Errorf("invalid github username")
 	default:
-		return fmt.Errorf("Could not search for GitHub username")
+		return fmt.Errorf("could not search for github username")
 	}
 }
 

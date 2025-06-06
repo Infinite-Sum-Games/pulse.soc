@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/IAmRiteshKoushik/pulse/cmd"
+	"github.com/IAmRiteshKoushik/pulse/types"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 )
@@ -15,7 +16,7 @@ import (
 var Valkey *redis.Client
 
 const (
-	Leaderboard = "leader-board-sset"
+	Leaderboard = "leaderboard-sset"
 	CppRank     = "cpp-ranking-sset"
 	JavaRank    = "java-ranking-sset"
 	PyRank      = "python-ranking-sset"
@@ -49,6 +50,7 @@ func GetParticipantRank(username string) (int64, error) {
 type ParticipantGlobal struct {
 	Username string `json:"github_username"`
 	Bounty   string `json:"bounty"`
+	Count    string `json:"pull_requests_merged"`
 }
 
 func GetLeaderboard() ([]ParticipantGlobal, error) {
@@ -66,9 +68,20 @@ func GetLeaderboard() ([]ParticipantGlobal, error) {
 	}
 
 	for _, participant := range participants {
+		// The leaderboard is fetched from a Redis sorted set where the score
+		// is a floating-point number.
+		// eg: 100.002
+		// Bounty = 100
+		// pull_request_count = 2
+
+		// The precision is 3 with the assumption that no one would cross
+		// 999 pull-requests in the entire duration of the program (4 months)
+		count := fmt.Sprintf("%v", participant.Score)
+		parts := strings.Split(count, ".")
 		results = append(results, ParticipantGlobal{
 			Username: fmt.Sprintf("%v", participant.Member),
-			Bounty:   fmt.Sprintf("%d", int(participant.Score)),
+			Bounty:   parts[0],
+			Count:    strings.TrimLeft(parts[1], "0"),
 		})
 	}
 	return results, nil
@@ -139,15 +152,7 @@ func GetTopParticipants() (map[string]map[string]Participant, error) {
 	return results, err
 }
 
-type LiveUpdate struct {
-	ID        string `json:"id"` // TODO: Grab id from Redis stream
-	Username  string `json:"github_username"`
-	Message   string `json:"message"`
-	EventType string `json:"event_type"` // TODO: Bounty, Issue, Top-3
-	Timestamp int64  `json:"time"`       // time is in unix.milliseconds for less size
-}
-
-func GetLatestLiveEvents(c *gin.Context) ([]LiveUpdate, error) {
+func GetLatestLiveEvents(c *gin.Context) ([]types.LiveUpdate, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -156,10 +161,10 @@ func GetLatestLiveEvents(c *gin.Context) ([]LiveUpdate, error) {
 		return nil, err
 	}
 	if len(events) == 0 {
-		return []LiveUpdate{}, nil
+		return []types.LiveUpdate{}, nil
 	}
 
-	result := []LiveUpdate{}
+	result := []types.LiveUpdate{}
 	for _, event := range events {
 		data, ok := event.Values["data"].(string)
 		if !ok {
@@ -167,7 +172,7 @@ func GetLatestLiveEvents(c *gin.Context) ([]LiveUpdate, error) {
 				fmt.Errorf("event entry is not in string format"))
 			continue // skipping malformed events (should not happen though)
 		}
-		var entry LiveUpdate
+		var entry types.LiveUpdate
 		if err := json.Unmarshal([]byte(data), &entry); err != nil {
 			cmd.Log.Fatal("Malformed events in Live-Update Stream.", err)
 			continue // skipping malformed events (shouldn't happen)
