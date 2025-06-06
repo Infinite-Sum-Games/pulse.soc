@@ -85,3 +85,34 @@ INSERT INTO issues (id, title, repoId, url, tags, difficulty, resolved) VALUES
   false
 );
 -- +goose StatementEnd
+
+-- +goose StatementBegin
+INSERT INTO issue_claims (id, ghUsername, issue_id, claimed_on, elapsed_on) VALUES
+(
+  gen_random_uuid(),
+  'IAmRiteshKoushik',
+  (SELECT id FROM issues WHERE url = 'https://github.com/aadit-n3rdy/gochaat/issues/1'),
+  NOW(),
+  NOW() + INTERVAL '7 days'
+),
+(
+  gen_random_uuid(), 
+  'Ashrockzzz2003',
+  (SELECT id FROM issues WHERE url = 'https://github.com/aadit-n3rdy/gochaat/issues/1'),
+  NOW(),
+  NOW() + INTERVAL '7 days'
+),
+(
+  gen_random_uuid(),
+  'IAmRiteshKoushik',
+  (SELECT id FROM issues WHERE url = 'https://github.com/Astrasv/NodeGainsDB/issues/1'),
+  NOW() - INTERVAL '2 days',
+  NOW() + INTERVAL '5 days'
+);
+-- +goose StatementEnd
+
+-- +goose Down
+-- +goose StatementBegin
+TRUNCATE TABLE user_account CASCADE;
+TRUNCATE TABLE issues CASCADE;
+-- +goose StatementEnd
