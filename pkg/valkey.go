@@ -91,7 +91,7 @@ func GetLeaderboard() ([]ParticipantGlobal, error) {
 // from the individual sorted sets for each language and returns only the top 2
 type Participant struct {
 	Username string `json:"github_username"`
-	Score    string `json:"pull_request_count"`
+	Score    string `json:"pull_request_merged"`
 }
 
 func GetTopParticipants() (map[string]map[string]Participant, error) {
