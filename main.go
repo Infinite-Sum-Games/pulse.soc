@@ -13,6 +13,7 @@ import (
 	c "github.com/IAmRiteshKoushik/pulse/controllers"
 	mw "github.com/IAmRiteshKoushik/pulse/middleware"
 	"github.com/IAmRiteshKoushik/pulse/pkg"
+	"github.com/IAmRiteshKoushik/pulse/sse"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -54,7 +55,18 @@ func StartApp() {
 		return
 	}
 	pkg.Valkey = client
-	cmd.Log.Info("[ACTIVE]: Valkey service is online")
+	cmd.Log.Info("[ACTIVE]: Valkey service is online.")
+
+	// Initialize LiveServer
+	sse.Live = sse.NewLiveServer()
+	mw.RecoverRoutine("LiveServer", sse.Live.Start)
+	cmd.Log.Info("[ACTIVE]: LiveServer is online.")
+
+	// Initialize the Valkey ReadStream
+	mw.RecoverRoutine("readValkeyStream", func() {
+		pkg.ReadStream(sse.Live)
+	})
+	cmd.Log.Info("[ACTIVE]: Valkey-Stream online.")
 
 	// Starting the server
 	ginLogs, err := os.Create("gin.log")

@@ -10,7 +10,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func ReadStream(ctx context.Context, lv *sse.LiveServer) {
+func ReadStream(lv *sse.LiveServer) {
 	// Read stream always begins from the latest set of events. If there is a
 	// server restart or a panic then a recover-and-restart mechanism is
 	// required inorder to continue operations. In between these, if there were
@@ -26,7 +26,7 @@ func ReadStream(ctx context.Context, lv *sse.LiveServer) {
 			Count:   10,
 			Block:   0, // indefinite block
 		}
-		streams, err := Valkey.XRead(ctx, args).Result()
+		streams, err := Valkey.XRead(context.Background(), args).Result()
 		if err != nil {
 			cmd.Log.Error("Failed to read from stream. Retrying in 2 seconds...", err)
 			// Backoff and then retry mechanism
