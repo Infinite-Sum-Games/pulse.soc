@@ -56,6 +56,9 @@ func FetchUserAccount(c *gin.Context) {
 				),
 				err,
 			)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Oops! Something happened. Please try again",
+			})
 			return
 		}
 		cmd.Log.Warn(
