@@ -26,11 +26,12 @@ SELECT
         'elapsing_on', c.elapsed_on
       ) ORDER BY c.claimed_on
     ) FILTER (WHERE c.id IS NOT NULL),
-  '[]'::JSONB
+  '[]'::JSON
   ) AS claimants
 FROM issues i
 LEFT JOIN
-  issue_claims AS c ON c.issue_id = i.id
+  issue_claims AS c 
+  ON c.issue_id = i.id
 WHERE 
   i.resolved = false
   AND i.repoId = $1
