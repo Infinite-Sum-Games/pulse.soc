@@ -43,6 +43,10 @@ func FetchRegistrationBoard(c *gin.Context) {
 func FetchLeaderboard(c *gin.Context) {
 	leaderboard, err := pkg.GetLeaderboard()
 	if err != nil {
+		cmd.Log.Error(fmt.Sprintf(
+			"[FAILURE]: Failed to fetch leaderboard at %s %s",
+			c.Request.Method, c.FullPath(),
+		), err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Oops! Something happened. Please try again later.",
 		})
@@ -52,6 +56,31 @@ func FetchLeaderboard(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message":     "Leaderboard fetched successfully",
 		"leaderboard": leaderboard,
+	})
+	cmd.Log.Info(fmt.Sprintf(
+		"[SUCCESS]: Processed request at %s %s",
+		c.Request.Method, c.FullPath(),
+	))
+}
+
+// Hall-Of-Fame is the language-wise leaderboard where the first two
+// participants of each language are returned
+func FetchHallOfFame(c *gin.Context) {
+	leaderboard, err := pkg.GetTopParticipants()
+	if err != nil {
+		cmd.Log.Error(fmt.Sprintf(
+			"[FAILURE]: Failed to fetch language-wise leaderboard at %s %s",
+			c.Request.Method, c.FullPath(),
+		), err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Oops! Something happened. Please try again later.",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":      "Language-wise leaderboard fetched successfully",
+		"leaderboards": leaderboard,
 	})
 	cmd.Log.Info(fmt.Sprintf(
 		"[SUCCESS]: Processed request at %s %s",

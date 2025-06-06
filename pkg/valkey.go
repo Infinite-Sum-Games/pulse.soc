@@ -110,6 +110,17 @@ func GetTopParticipants() (map[string]map[string]Participant, error) {
 	var err error
 	for _, sset := range ssets {
 		name := strings.Split(sset, "-")[0] // extracting the language name
+		results[name] = map[string]Participant{
+			"first_place": {
+				Username: "-",
+				Score:    "-1",
+			},
+			"second_place": {
+				Username: "-",
+				Score:    "-1",
+			},
+		}
+
 		members, err := Valkey.ZRevRangeByScoreWithScores(ctx, sset,
 			&redis.ZRangeBy{
 				Min:    "1",
@@ -117,16 +128,6 @@ func GetTopParticipants() (map[string]map[string]Participant, error) {
 				Offset: 0,
 				Count:  2,
 			}).Result()
-
-		// Setting up defaults
-		results[name]["first_place"] = Participant{
-			Username: "-",
-			Score:    "-1",
-		}
-		results[name]["second_place"] = Participant{
-			Username: "-",
-			Score:    "-1",
-		}
 
 		// If unable to find the sorted-set due to Redis errors
 		if err != nil {
