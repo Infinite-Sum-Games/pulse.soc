@@ -62,7 +62,7 @@ func FetchIssues(c *gin.Context) {
 		pkg.DbError(c, err)
 		return
 	}
-	conn.Release()
+	defer conn.Release()
 
 	q := db.New()
 	ok, err := q.CheckIfProjectExistsQuery(ctx, conn, projectId)
@@ -87,8 +87,8 @@ func FetchIssues(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":  "Issues retrived successfully",
-		"projects": results,
+		"message": "Issues retrived successfully",
+		"issues":  results,
 	})
 	cmd.Log.Info(fmt.Sprintf(
 		"[SUCCESS]: Processed request at %s %s",
