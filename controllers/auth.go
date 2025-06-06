@@ -160,11 +160,7 @@ func RegisterUserOtpVerify(c *gin.Context) {
 		return
 	}
 
-	onboardGhUsername, err := q.CreateUserAccountQuery(ctx, tx,
-		db.CreateUserAccountQueryParams{
-			Email:      verifiedUser.Email,
-			Ghusername: verifiedUser.Ghusername,
-		})
+	onboardGhUsername, err := q.CreateUserAccountQuery(ctx, tx, db.CreateUserAccountQueryParams(verifiedUser))
 	if err != nil {
 		pkg.DbError(c, err)
 		return
