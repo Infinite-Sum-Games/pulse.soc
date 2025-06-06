@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -41,9 +42,17 @@ func ReadStream(lv *sse.LiveServer) {
 				for _, val := range message.Values {
 					data, ok := val.(string)
 					if !ok {
+						cmd.Log.Warn("Stream contains values which are not strings")
 						continue
 					}
-					liveUpdate := fmt.Sprintf("data: %s\n\n", data)
+					var result map[string]any
+					err := json.Unmarshal([]byte(data), &result)
+					if err != nil {
+						cmd.Log.Error("Failed to unmarshal JSON at ReadStream", err)
+						continue
+					}
+					fmt.Println()
+					liveUpdate := fmt.Sprintf("data: \"%s\", \"%s\", \"%s\", \"%.f\"\n\n", result["github_username"], result["message"], result["event_type"], result["time"])
 					lv.Broadcast <- liveUpdate
 				}
 			}
