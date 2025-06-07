@@ -316,7 +316,7 @@ INSERT INTO repository
   'Maintain credits and debts between friends with CredDebt the Kotlin app powered with Jetpack Compose',
   'https://github.com/airyha/CreDebt',
   '{"airyha"}',
-  '{"Kotlin", "Android", "SQlite", "Jetpack Compose"}',
+  '{"Kotlin", "Android", "SQlite", "JetpackCompose"}',
   true),
 (
   gen_random_uuid(),
@@ -324,7 +324,7 @@ INSERT INTO repository
   'An app for students to organize common study-spaces and ease details sharing.',
   'https://github.com/airyha/StudyBuddy',
   '{"airyha"}',
-  '{"Kotlin", "Android", "SQlite", "Jetpack Compose"}',
+  '{"Kotlin", "Android", "SQlite", "JetpackCompose"}',
   true),
 (
   gen_random_uuid(),
@@ -388,7 +388,7 @@ INSERT INTO repository
   'Supercharge your investment tracking with this secure, Google Sheets-powered portfolio manager. Visualize growth, analyze performance, and take control of your financial future—all within your private Google ecosystem.', 
   'https://github.com/akshayxml/panam', 
   '{"Ashrockzzz2003", "akshayxml"}', 
-  '{"Typescript", "AppScript"}', 
+  '{"Typescript", "AppScripts"}', 
   false),
 (
   gen_random_uuid(), 
