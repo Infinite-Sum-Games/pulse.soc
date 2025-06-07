@@ -76,7 +76,7 @@ func RegisterUserAccount(c *gin.Context) {
 	result, err := q.BeginUserRegistrationQuery(ctx, tx,
 		db.BeginUserRegistrationQueryParams{
 			FirstName:  body.FirstName,
-			MiddleName: pgtype.Text{String: body.FirstName, Valid: true},
+			MiddleName: pgtype.Text{String: body.MiddleName, Valid: true},
 			LastName:   body.LastName,
 			Email:      body.Email,
 			Ghusername: body.GhUsername,
