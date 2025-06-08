@@ -16,8 +16,10 @@ type EnvConfig struct {
 	FrontendURL string `mapstructure:"frontend_url"`
 
 	Valkey struct {
-		Host string `mapstructure:"host"`
-		Port int    `mapsstructure:"port"`
+		Host     string `mapstructure:"host"`
+		Port     int    `mapsstructure:"port"`
+		Username string `mapsstructure:"string"`
+		Password string `mapsstructure:"password"`
 	} `mapstructure:"valkey"`
 
 	SMTP struct {

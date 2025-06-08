@@ -17,11 +17,14 @@ import (
 func InitValkey() (*redis.Client, error) {
 	host := AppConfig.Valkey.Host
 	port := AppConfig.Valkey.Port
+	uname := AppConfig.Valkey.Username
+	passwd := AppConfig.Valkey.Password
 	resp := 3
 
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", host, port),
-		Password: "",
+		Username: uname,
+		Password: passwd,
 		DB:       0, // default DB
 		Protocol: resp,
 	})
