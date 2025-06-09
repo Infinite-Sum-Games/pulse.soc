@@ -5,9 +5,13 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/profile
+  url: {{baseUrl}}/profile?user=
   body: none
   auth: inherit
+}
+
+params:query {
+  user: 
 }
 
 script:pre-request {

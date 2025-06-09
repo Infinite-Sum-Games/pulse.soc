@@ -14,20 +14,30 @@ import (
 )
 
 func FetchUserAccount(c *gin.Context) {
-	username, ok := pkg.GrabUsername(c)
+	username, ok := c.GetQuery("user")
 	if !ok {
 		cmd.Log.Warn(
-			fmt.Sprintf(
-				"Username did not set in Gin-Context post Authentication at %s %s",
-				c.Request.Method,
-				c.FullPath(),
-			),
+			fmt.Sprintf("`user` query parameter missing in %s %s", c.Request.Method, c.FullPath()),
 		)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Oops! Something happened. Please try again later.",
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "The request is malformed",
 		})
 		return
 	}
+	// username, ok := pkg.GrabUsername(c)
+	// if !ok {
+	// 	cmd.Log.Warn(
+	// 		fmt.Sprintf(
+	// 			"Username did not set in Gin-Context post Authentication at %s %s",
+	// 			c.Request.Method,
+	// 			c.FullPath(),
+	// 		),
+	// 	)
+	// 	c.JSON(http.StatusInternalServerError, gin.H{
+	// 		"message": "Oops! Something happened. Please try again later.",
+	// 	})
+	// 	return
+	// }
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

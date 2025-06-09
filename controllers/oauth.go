@@ -23,15 +23,18 @@ func InitiateGitHubOAuth(c *gin.Context) {
 }
 
 func CompleteGitHubOAuth(c *gin.Context) {
+	redirectUrl := cmd.AppConfig.FrontendURL + "/register"
+
 	// Extract code from github oauth callback URL
 	code := c.Query("code")
 	if code == "" {
 		cmd.Log.Warn(
 			fmt.Sprintf("Missing authorization code in github oauth callback at %s %s",
 				c.Request.Method, c.FullPath()))
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Missing authorization code",
-		})
+		c.Redirect(http.StatusTemporaryRedirect, cmd.AppConfig.FrontendURL)
+		// c.JSON(http.StatusBadRequest, gin.H{
+		// 	"message": "Missing authorization code",
+		// })
 		return
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -44,9 +47,10 @@ func CompleteGitHubOAuth(c *gin.Context) {
 		cmd.Log.Error(
 			fmt.Sprintf("Failed to exchange code for token at %s %s",
 				c.Request.Method, c.FullPath()), err)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Oops! Something happened. Please try again later",
-		})
+		c.Redirect(http.StatusTemporaryRedirect, cmd.AppConfig.FrontendURL)
+		// c.JSON(http.StatusInternalServerError, gin.H{
+		// 	"message": "Oops! Something happened. Please try again later",
+		// })
 		return
 	}
 
@@ -56,9 +60,10 @@ func CompleteGitHubOAuth(c *gin.Context) {
 		cmd.Log.Warn(
 			fmt.Sprintf("Failed to fetch user info from GitHub at %s %s",
 				c.Request.Method, c.FullPath()))
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Oops! Something happened. Please try again later",
-		})
+		c.Redirect(http.StatusTemporaryRedirect, cmd.AppConfig.FrontendURL)
+		// c.JSON(http.StatusInternalServerError, gin.H{
+		// 	"message": "Oops! Something happened. Please try again later",
+		// })
 		return
 	}
 	defer resp.Body.Close()
@@ -67,9 +72,10 @@ func CompleteGitHubOAuth(c *gin.Context) {
 	if err != nil {
 		cmd.Log.Warn(fmt.Sprintf("Failed to unmarshal github user info at %s %s",
 			c.Request.Method, c.FullPath()))
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Oops! Something happened. Please try again later",
-		})
+		c.Redirect(http.StatusTemporaryRedirect, cmd.AppConfig.FrontendURL)
+		// c.JSON(http.StatusInternalServerError, gin.H{
+		// 	"message": "Oops! Something happened. Please try again later",
+		// })
 		return
 	}
 	// Extracting the github user
@@ -78,9 +84,10 @@ func CompleteGitHubOAuth(c *gin.Context) {
 		cmd.Log.Error(
 			fmt.Sprintf("Failed to parse github user info at %s %s",
 				c.Request.Method, c.FullPath()), err)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Oops! Something happened. Please try again later",
-		})
+		c.Redirect(http.StatusTemporaryRedirect, cmd.AppConfig.FrontendURL)
+		// c.JSON(http.StatusInternalServerError, gin.H{
+		// 	"message": "Oops! Something happened. Please try again later",
+		// })
 		return
 	}
 
@@ -88,7 +95,8 @@ func CompleteGitHubOAuth(c *gin.Context) {
 	// post registration
 	tx, err := cmd.DBPool.Begin(ctx)
 	if err != nil {
-		pkg.DbError(c, err)
+		// pkg.DbError(c, err)
+		c.Redirect(http.StatusTemporaryRedirect, cmd.AppConfig.FrontendURL)
 		return
 	}
 	defer tx.Rollback(ctx)
@@ -96,7 +104,8 @@ func CompleteGitHubOAuth(c *gin.Context) {
 	q := db.New()
 	userExist, err := q.RetriveExistingUserQuery(ctx, tx, user.Username)
 	if err != nil {
-		pkg.DbError(c, err)
+		// pkg.DbError(c, err)
+		c.Redirect(http.StatusTemporaryRedirect, redirectUrl)
 		return
 	}
 
@@ -107,9 +116,10 @@ func CompleteGitHubOAuth(c *gin.Context) {
 		cmd.Log.Error(
 			fmt.Sprintf("Failed to create access token at %s %s", c.Request.Method, c.FullPath()),
 			err)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Oops! Something happened. Please try again later",
-		})
+		c.Redirect(http.StatusTemporaryRedirect, redirectUrl)
+		// c.JSON(http.StatusInternalServerError, gin.H{
+		// 	"message": "Oops! Something happened. Please try again later",
+		// })
 		return
 	}
 	refreshToken, err := pkg.CreateToken(userExist.Ghusername, userExist.Email, "refresh_token")
@@ -117,9 +127,10 @@ func CompleteGitHubOAuth(c *gin.Context) {
 		cmd.Log.Error(
 			fmt.Sprintf("Failed to create token at %s %s", c.Request.Method, c.FullPath()),
 			err)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Oops! Something happened. Please try again later",
-		})
+		c.Redirect(http.StatusTemporaryRedirect, redirectUrl)
+		// c.JSON(http.StatusInternalServerError, gin.H{
+		// 	"message": "Oops! Something happened. Please try again later",
+		// })
 		return
 	}
 
@@ -128,13 +139,15 @@ func CompleteGitHubOAuth(c *gin.Context) {
 		RefreshToken: pgtype.Text{String: refreshToken, Valid: true},
 	})
 	if err != nil {
-		cmd.Log.Debug("Error occurred here")
-		pkg.DbError(c, err)
+		cmd.Log.Error(
+			fmt.Sprintf("Failed to process request at %s %s", c.Request.Method, c.FullPath()), err)
+		c.Redirect(http.StatusTemporaryRedirect, redirectUrl)
 		return
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		pkg.DbError(c, err)
+		cmd.Log.Error(fmt.Sprintf("Failed to process request at %s %s", c.Request.Method, c.FullPath()), err)
+		c.Redirect(http.StatusTemporaryRedirect, redirectUrl)
 		return
 	}
 
