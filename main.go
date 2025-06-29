@@ -85,7 +85,7 @@ func StartApp() {
 	router.Use(cors.New(cors.Config{
 		// Webhook domain hardcoded for now, move to array based environment
 		// variable later
-		AllowOrigins:     []string{cmd.AppConfig.FrontendURL, "webhooksoc.vercel.app"},
+		AllowOrigins:     []string{cmd.AppConfig.FrontendURL, "https://webhooksoc.vercel.app"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
