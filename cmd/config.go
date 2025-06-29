@@ -33,6 +33,7 @@ type EnvConfig struct {
 		ClientID     string `mapstructure:"client_id"`
 		ClientSecret string `mapstructure:"client_secret"`
 		RedirectURL  string `mapstructure:"redirect_url"`
+		PAT          string `mapstructure:"personal_access_token"`
 	} `mapstructure:"github"`
 }
 
@@ -121,6 +122,9 @@ func validateConfig(config *EnvConfig) error {
 	}
 	if config.GitHub.RedirectURL == "" {
 		return fmt.Errorf("GitHub redirect URL is required")
+	}
+	if config.GitHub.PAT == "" {
+		return fmt.Errorf("GitHub PAT is required")
 	}
 
 	return nil

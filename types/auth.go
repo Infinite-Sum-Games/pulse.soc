@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 
+	"github.com/IAmRiteshKoushik/pulse/cmd"
 	v "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
@@ -43,23 +45,57 @@ func (r *RegisterUserRequest) Validate() error {
 
 	// Check for Valid GitHub username
 	url := fmt.Sprintf("https://api.github.com/users/%s", r.GhUsername)
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return err
+	client := &http.Client{Timeout: 10 * time.Second}
+	maxRetries := 3
+
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			return err
+		}
+
+		// Add PAT to the Authorization header
+		req.Header.Set("Authorization", "Bearer "+cmd.AppConfig.GitHub.PAT)
+		req.Header.Set("Accept", "application/vnd.github.v3+json")
+
+		resp, err := client.Do(req)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+
+		remaining := resp.Header.Get("X-RateLimit-Remaining")
+		resetTime := resp.Header.Get("X-RateLimit-Reset")
+		if remaining == "0" {
+			resetUnix, _ := time.Parse(time.RFC3339, resetTime)
+			waitDuration := time.Until(resetUnix)
+			cmd.Log.Warn(
+				fmt.Sprintf("Rate limit exceeded. Waiting for %v seconds before retrying...\n",
+					waitDuration.Seconds(),
+				),
+			)
+			continue
+		}
+
+		switch resp.StatusCode {
+		case http.StatusOK:
+			// Username found
+			cmd.Log.Info("GitHub username verified successfully")
+			return nil
+		case http.StatusNotFound:
+			// Username not found
+			return fmt.Errorf("Invalid GitHub username")
+		case http.StatusTooManyRequests:
+			// Username search failed due to rate-limit
+			// Exponential backoff with retries
+			waitTime := time.Duration(attempt*attempt) * time.Second
+			time.Sleep(waitTime)
+			continue
+		default:
+			return fmt.Errorf("Unexpected status code. Could not find GitHub username.")
+		}
 	}
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	switch resp.StatusCode {
-	case http.StatusOK:
-		return nil
-	case http.StatusNotFound:
-		return fmt.Errorf("invalid github username")
-	default:
-		return fmt.Errorf("could not search for github username")
-	}
+	return fmt.Errorf("Max retries exceeded for validating GitHub username.")
 }
 
 type RegisterUserOtpVerifyRequest struct {
