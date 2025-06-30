@@ -47,7 +47,7 @@ FROM
   user_onboarding 
 WHERE
   ghUsername = $1
-  AND expiry_at >= NOW() + INTERVAL '1 minute';
+  AND expiry_at >= NOW();
 
 -- name: BeginUserRegistrationQuery :one
 INSERT INTO 
@@ -61,7 +61,7 @@ INSERT INTO
     otp,
     expiry_at
   )
-VALUES ($1, $2, $3, $4, $5, $6, NOW() + INTERVAL '7 minutes')
+VALUES ($1, $2, $3, $4, $5, $6, NOW() + INTERVAL '25 minutes')
 RETURNING
   email, otp;
 
