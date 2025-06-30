@@ -12,9 +12,9 @@ func CreateToken(ghUsername, email, tokenType string) (string, error) {
 	var expiryAt time.Time
 	switch tokenType {
 	case "temp_token":
-		expiryAt = time.Now().Add(5 * time.Minute)
+		expiryAt = time.Now().Add(25 * time.Minute)
 	case "access_token":
-		expiryAt = time.Now().Add(1 * time.Hour)
+		expiryAt = time.Now().Add(4 * time.Hour)
 	case "refresh_token":
 		expiryAt = time.Now().Add(90 * 24 * time.Hour)
 	default:
