@@ -32,12 +32,9 @@ func CompleteGitHubOAuth(c *gin.Context) {
 			fmt.Sprintf("Missing authorization code in github oauth callback at %s %s",
 				c.Request.Method, c.FullPath()))
 		c.Redirect(http.StatusTemporaryRedirect, cmd.AppConfig.FrontendURL)
-		// c.JSON(http.StatusBadRequest, gin.H{
-		// 	"message": "Missing authorization code",
-		// })
 		return
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	// Fetching the github user
@@ -48,9 +45,6 @@ func CompleteGitHubOAuth(c *gin.Context) {
 			fmt.Sprintf("Failed to exchange code for token at %s %s",
 				c.Request.Method, c.FullPath()), err)
 		c.Redirect(http.StatusTemporaryRedirect, cmd.AppConfig.FrontendURL)
-		// c.JSON(http.StatusInternalServerError, gin.H{
-		// 	"message": "Oops! Something happened. Please try again later",
-		// })
 		return
 	}
 
