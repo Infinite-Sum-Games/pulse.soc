@@ -31,10 +31,10 @@ SELECT
 FROM issues i
 LEFT JOIN
   issue_claims AS c 
-  ON c.issue_id = i.id
+  ON c.issue_url = i.url
 WHERE 
   i.resolved = false
-  AND i.repoId = $1
+  AND i.id = $1
 GROUP BY
   i.id, 
   i.title, 
