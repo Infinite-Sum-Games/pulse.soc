@@ -383,6 +383,14 @@ INSERT INTO repository
   '{"Markdown"}',
   true),
 (
+  gen_random_uuid(),
+  'JSON-ite',
+  'Hand-rolled JSON parser',
+  'https://github.com/IAmRiteshKoushik/jsonite',
+  '{"IAmRiteshKoushik"}',
+  '{"Python"}',
+  true),
+(
   gen_random_uuid(), 
   'PANAM: Money Management App', 
   'Supercharge your investment tracking with this secure, Google Sheets-powered portfolio manager. Visualize growth, analyze performance, and take control of your financial future—all within your private Google ecosystem.', 
