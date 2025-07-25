@@ -35,7 +35,7 @@ func NewLoggerService(environment string, file *os.File) *LoggerService {
 
 	} else if environment == "production" {
 		// Logging only to file during production
-		output = zerolog.ConsoleWriter{Out: file, TimeFormat: time.RFC3339}
+		output = zerolog.ConsoleWriter{Out: file, TimeFormat: time.RFC3339, NoColor: true}
 
 	} else {
 		panic(errors.New("could not identify environment"))
