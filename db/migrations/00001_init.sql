@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS repository(
   maintainers TEXT[],
   tags TEXT[],
   is_internal BOOLEAN DEFAULT false,
-  installation_id BIGINT UNIQUE,
+  installation_id BIGINT,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW(),
 
