@@ -240,3 +240,47 @@ func RegisterUserOtpResend(c *gin.Context) {
 		c.Request.Method, c.FullPath(),
 	))
 }
+
+func LoginUser(c *gin.Context) {
+    var body types.LoginUserRequest
+    if err := c.BindJSON(&body); err != nil {
+        pkg.JSONUnmarshallError(c, err)
+        return
+    }
+    if err := body.Validate(); err != nil {
+        pkg.RequestValidatorError(c, err)
+        return
+    }
+
+    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel()
+
+
+    q := db.New()
+    user, err := q.GetUserByEmail(ctx, cmd.DBPool, body.Email)
+    if err != nil {
+        cmd.Log.Warn(fmt.Sprintf("Login failed: Email %s not found or DB error: %v", body.Email, err))
+        c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid email or password"})
+        return
+    }
+
+	if err := pkg.CompareHash(user.Password, body.Password); err != nil {
+		cmd.Log.Warn(fmt.Sprintf("Login failed: Incorrect password for email %s", body.Email))
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid email or password"})
+		return
+	}
+
+    accessToken, err := pkg.CreateToken("", user.Email, "access_token")
+    if err != nil {
+        cmd.Log.Error(fmt.Sprintf("Failed to generate token for %s", user.Email), err)
+        c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{
+        "message":    "Login successful",
+        "access_key": accessToken,
+    })
+    
+    cmd.Log.Info(fmt.Sprintf("[SUCCESS]: User logged in: %s", user.Email))
+}

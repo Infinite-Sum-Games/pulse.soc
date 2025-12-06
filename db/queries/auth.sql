@@ -88,3 +88,8 @@ INSERT INTO
 VALUES ($1, $2, $3, $4, $5)
 RETURNING
   ghUsername;
+
+-- name: GetUserByEmail :one
+SELECT id, email, password 
+FROM user_account 
+WHERE email = $1 LIMIT 1;
