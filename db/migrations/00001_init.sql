@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS user_onboarding(
   middle_name TEXT,
   last_name TEXT NOT NULL,
   email TEXT NOT NULL,
-  ghUsername TEXT,
+  ghUsername TEXT UNIQUE,
   password TEXT NOT NULL,
   otp TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT NOW(),
