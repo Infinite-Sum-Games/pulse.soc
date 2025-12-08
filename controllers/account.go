@@ -10,6 +10,7 @@ import (
 	db "github.com/IAmRiteshKoushik/pulse/db/gen"
 	"github.com/IAmRiteshKoushik/pulse/pkg"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -50,7 +51,7 @@ func FetchUserAccount(c *gin.Context) {
 	defer conn.Release()
 
 	q := db.New()
-	user, err := q.FetchProfileQuery(ctx, conn, username)
+	user, err := q.FetchProfileQuery(ctx, conn, pgtype.Text{String: username, Valid: true})
 	if err != nil {
 		pkg.DbError(c, err)
 		return

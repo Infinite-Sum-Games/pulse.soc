@@ -57,7 +57,7 @@ func RegisterUserAccount(c *gin.Context) {
 	defer tx.Rollback(ctx)
 
 	q := db.New()
-	ok, err := q.CheckUserExistQuery(ctx, tx, body.GhUsername)
+	ok, err := q.CheckUserExistQuery(ctx, tx, pgtype.Text{String: body.GhUsername, Valid: true})
 	if err != nil {
 		cmd.Log.Debug("Error here")
 		pkg.DbError(c, err)
@@ -79,7 +79,7 @@ func RegisterUserAccount(c *gin.Context) {
 			MiddleName: pgtype.Text{String: body.MiddleName, Valid: true},
 			LastName:   body.LastName,
 			Email:      body.Email,
-			Ghusername: body.GhUsername,
+			Ghusername: pgtype.Text{String: body.GhUsername, Valid: true},
 			Otp:        otp,
 		})
 	if err != nil {
@@ -147,7 +147,7 @@ func RegisterUserOtpVerify(c *gin.Context) {
 
 	q := db.New()
 	verifiedUser, err := q.VerifyOtpQuery(ctx, tx, db.VerifyOtpQueryParams{
-		Ghusername: username,
+		Ghusername: pgtype.Text{String: username, Valid: true},
 		Otp:        body.Otp,
 	})
 	if err != nil {
@@ -169,7 +169,8 @@ func RegisterUserOtpVerify(c *gin.Context) {
 		pkg.DbError(c, err)
 		return
 	}
-	if onboardGhUsername == "" {
+
+	if onboardGhUsername.String == "" {
 		cmd.Log.Warn(
 			fmt.Sprintf("Failed to onboard user at %s %s", c.Request.Method, c.FullPath()))
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -215,7 +216,7 @@ func RegisterUserOtpResend(c *gin.Context) {
 	defer conn.Release()
 
 	q := db.New()
-	result, err := q.CheckForExistingOtpQuery(ctx, conn, username)
+	result, err := q.CheckForExistingOtpQuery(ctx, conn, pgtype.Text{String: username, Valid: true})
 	if err != nil {
 		pkg.DbError(c, err)
 		return
@@ -242,27 +243,27 @@ func RegisterUserOtpResend(c *gin.Context) {
 }
 
 func LoginUser(c *gin.Context) {
-    var body types.LoginUserRequest
-    if err := c.BindJSON(&body); err != nil {
-        pkg.JSONUnmarshallError(c, err)
-        return
-    }
-    if err := body.Validate(); err != nil {
-        pkg.RequestValidatorError(c, err)
-        return
-    }
+	fmt.Println("LoginUser called")
+	var body types.LoginUserRequest
+	if err := c.BindJSON(&body); err != nil {
+		pkg.JSONUnmarshallError(c, err)
+		return
+	}
+	if err := body.Validate(); err != nil {
+		pkg.RequestValidatorError(c, err)
+		return
+	}
 
-    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-    defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-
-    q := db.New()
-    user, err := q.GetUserByEmail(ctx, cmd.DBPool, body.Email)
-    if err != nil {
-        cmd.Log.Warn(fmt.Sprintf("Login failed: Email %s not found or DB error: %v", body.Email, err))
-        c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid email or password"})
-        return
-    }
+	q := db.New()
+	user, err := q.GetUserByEmail(ctx, cmd.DBPool, body.Email)
+	if err != nil {
+		cmd.Log.Warn(fmt.Sprintf("Login failed: Email %s not found or DB error: %v", body.Email, err))
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid email or password"})
+		return
+	}
 
 	if err := pkg.CompareHash(user.Password, body.Password); err != nil {
 		cmd.Log.Warn(fmt.Sprintf("Login failed: Incorrect password for email %s", body.Email))
@@ -270,17 +271,17 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-    accessToken, err := pkg.CreateToken("", user.Email, "access_token")
-    if err != nil {
-        cmd.Log.Error(fmt.Sprintf("Failed to generate token for %s", user.Email), err)
-        c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})
-        return
-    }
+	accessToken, err := pkg.CreateToken("", user.Email, "access_token")
+	if err != nil {
+		cmd.Log.Error(fmt.Sprintf("Failed to generate token for %s", user.Email), err)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})
+		return
+	}
 
-    c.JSON(http.StatusOK, gin.H{
-        "message":    "Login successful",
-        "access_key": accessToken,
-    })
-    
-    cmd.Log.Info(fmt.Sprintf("[SUCCESS]: User logged in: %s", user.Email))
+	c.JSON(http.StatusOK, gin.H{
+		"message":    "Login successful",
+		"access_key": accessToken,
+	})
+
+	cmd.Log.Info(fmt.Sprintf("[SUCCESS]: User logged in: %s", user.Email))
 }

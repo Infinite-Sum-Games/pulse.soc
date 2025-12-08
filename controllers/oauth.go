@@ -17,24 +17,24 @@ import (
 )
 
 func InitiateGitHubOAuth(c *gin.Context) {
-    emailVal, ok := c.Get("email")
-    if !ok {
-        c.JSON(http.StatusUnauthorized, gin.H{"message": "You must be logged in to link your GitHub account."})
-        return
-    }
-    email := emailVal.(string)
+	emailVal, ok := c.Get("email")
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "You must be logged in to link your GitHub account."})
+		return
+	}
+	email := emailVal.(string)
 
-    stateToken, err := pkg.CreateToken("", email, "temp_token")
-    if err != nil {
-        cmd.Log.Error("Failed to generate state token", err)
-        c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})
-        return
-    }
+	stateToken, err := pkg.CreateToken("", email, "temp_token")
+	if err != nil {
+		cmd.Log.Error("Failed to generate state token", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})
+		return
+	}
 
-    url := cmd.GithubOAuthConfig.AuthCodeURL(stateToken)
-    c.Redirect(http.StatusTemporaryRedirect, url)
-    
-    cmd.Log.Info(fmt.Sprintf("Initiated GitHub Link for %s", email))
+	url := cmd.GithubOAuthConfig.AuthCodeURL(stateToken)
+	c.Redirect(http.StatusTemporaryRedirect, url)
+
+	cmd.Log.Info(fmt.Sprintf("Initiated GitHub Link for %s", email))
 }
 
 func CompleteGitHubOAuth(c *gin.Context) {
@@ -52,12 +52,12 @@ func CompleteGitHubOAuth(c *gin.Context) {
 	}
 
 	claims, err := pkg.VerifyToken(stateToken)
-    if err != nil || claims.TokenType != "temp_token" {
-        cmd.Log.Warn(fmt.Sprintf("Invalid state token: %v", err))
-        c.Redirect(http.StatusTemporaryRedirect, redirectUrl)
-        return
-    }
-    userEmail := claims.Email
+	if err != nil || claims.TokenType != "temp_token" {
+		cmd.Log.Warn(fmt.Sprintf("Invalid state token: %v", err))
+		c.Redirect(http.StatusTemporaryRedirect, redirectUrl)
+		return
+	}
+	userEmail := claims.Email
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -123,15 +123,15 @@ func CompleteGitHubOAuth(c *gin.Context) {
 	q := db.New()
 
 	err = q.UpdateUserGithubUsername(ctx, tx, db.UpdateUserGithubUsernameParams{
-        Ghusername: pgtype.Text{String: ghUser.Username, Valid: true},
-        Email:      userEmail,
-    })
+		Ghusername: pgtype.Text{String: ghUser.Username, Valid: true},
+		Email:      userEmail,
+	})
 
 	if err != nil {
-        cmd.Log.Error(fmt.Sprintf("Failed to link GitHub account %s to %s", ghUser.Username, userEmail), err)
-        c.Redirect(http.StatusTemporaryRedirect, redirectUrl+"?error=account_already_linked")
-        return
-    }
+		cmd.Log.Error(fmt.Sprintf("Failed to link GitHub account %s to %s", ghUser.Username, userEmail), err)
+		c.Redirect(http.StatusTemporaryRedirect, redirectUrl+"?error=account_already_linked")
+		return
+	}
 
 	userExist, err := q.RetriveExistingUserQuery(ctx, tx, pgtype.Text{String: ghUser.Username, Valid: true})
 	if err != nil {
@@ -239,10 +239,10 @@ func RegenerateToken(c *gin.Context) {
 	validIssuer := claims.Issuer == "api.season-of-code"
 	validTokenType := claims.TokenType == "refresh_token"
 	if !validIssuer || !validTokenType {
-        cmd.Log.Error(fmt.Sprintf("Tampered token at %s %s", c.Request.Method, c.FullPath()), err)
-        c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"message": "Server refused to process the request"})
-        return
-    }
+		cmd.Log.Error(fmt.Sprintf("Tampered token at %s %s", c.Request.Method, c.FullPath()), err)
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"message": "Server refused to process the request"})
+		return
+	}
 
 	// Actual controller
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
