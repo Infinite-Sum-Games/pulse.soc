@@ -93,3 +93,8 @@ RETURNING
 SELECT id, email, password 
 FROM user_account 
 WHERE email = $1 LIMIT 1;
+
+-- name: UpdateUserGithubUsername :exec
+UPDATE user_account 
+SET ghUsername = $1, updated_at = NOW() 
+WHERE email = $2;

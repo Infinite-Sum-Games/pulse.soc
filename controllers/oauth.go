@@ -17,23 +17,48 @@ import (
 )
 
 func InitiateGitHubOAuth(c *gin.Context) {
-	url := cmd.GithubOAuthConfig.AuthCodeURL("")
-	c.Redirect(http.StatusTemporaryRedirect, url)
-	cmd.Log.Info("Successfully initiated GitHub oAuth at GET /api/v1/auth/github")
+    emailVal, ok := c.Get("email")
+    if !ok {
+        c.JSON(http.StatusUnauthorized, gin.H{"message": "You must be logged in to link your GitHub account."})
+        return
+    }
+    email := emailVal.(string)
+
+    stateToken, err := pkg.CreateToken("", email, "temp_token")
+    if err != nil {
+        cmd.Log.Error("Failed to generate state token", err)
+        c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})
+        return
+    }
+
+    url := cmd.GithubOAuthConfig.AuthCodeURL(stateToken)
+    c.Redirect(http.StatusTemporaryRedirect, url)
+    
+    cmd.Log.Info(fmt.Sprintf("Initiated GitHub Link for %s", email))
 }
 
 func CompleteGitHubOAuth(c *gin.Context) {
-	redirectUrl := cmd.AppConfig.FrontendURL + "/register"
+	redirectUrl := cmd.AppConfig.FrontendURL
 
 	// Extract code from github oauth callback URL
 	code := c.Query("code")
-	if code == "" {
+	stateToken := c.Query("state")
+	if code == "" || stateToken == "" {
 		cmd.Log.Warn(
-			fmt.Sprintf("Missing authorization code in github oauth callback at %s %s",
+			fmt.Sprintf("Missing authorization code or state token in github oauth callback at %s %s",
 				c.Request.Method, c.FullPath()))
 		c.Redirect(http.StatusTemporaryRedirect, cmd.AppConfig.FrontendURL)
 		return
 	}
+
+	claims, err := pkg.VerifyToken(stateToken)
+    if err != nil || claims.TokenType != "temp_token" {
+        cmd.Log.Warn(fmt.Sprintf("Invalid state token: %v", err))
+        c.Redirect(http.StatusTemporaryRedirect, redirectUrl)
+        return
+    }
+    userEmail := claims.Email
+
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -73,8 +98,8 @@ func CompleteGitHubOAuth(c *gin.Context) {
 		return
 	}
 	// Extracting the github user
-	var user types.GithubUser
-	if err := json.Unmarshal(body, &user); err != nil {
+	var ghUser types.GithubUser
+	if err := json.Unmarshal(body, &ghUser); err != nil {
 		cmd.Log.Error(
 			fmt.Sprintf("Failed to parse github user info at %s %s",
 				c.Request.Method, c.FullPath()), err)
@@ -96,7 +121,19 @@ func CompleteGitHubOAuth(c *gin.Context) {
 	defer tx.Rollback(ctx)
 
 	q := db.New()
-	userExist, err := q.RetriveExistingUserQuery(ctx, tx, user.Username)
+
+	err = q.UpdateUserGithubUsername(ctx, tx, db.UpdateUserGithubUsernameParams{
+        Ghusername: pgtype.Text{String: ghUser.Username, Valid: true},
+        Email:      userEmail,
+    })
+
+	if err != nil {
+        cmd.Log.Error(fmt.Sprintf("Failed to link GitHub account %s to %s", ghUser.Username, userEmail), err)
+        c.Redirect(http.StatusTemporaryRedirect, redirectUrl+"?error=account_already_linked")
+        return
+    }
+
+	userExist, err := q.RetriveExistingUserQuery(ctx, tx, pgtype.Text{String: ghUser.Username, Valid: true})
 	if err != nil {
 		// pkg.DbError(c, err)
 		c.Redirect(http.StatusTemporaryRedirect, redirectUrl)
@@ -105,7 +142,7 @@ func CompleteGitHubOAuth(c *gin.Context) {
 
 	// If the presence is verified, then generate access and refresh token
 	// , add them in DB and respond back in request
-	accessToken, err := pkg.CreateToken(userExist.Ghusername, userExist.Email, "access_token")
+	accessToken, err := pkg.CreateToken(userExist.Ghusername.String, userExist.Email, "access_token")
 	if err != nil {
 		cmd.Log.Error(
 			fmt.Sprintf("Failed to create access token at %s %s", c.Request.Method, c.FullPath()),
@@ -116,7 +153,7 @@ func CompleteGitHubOAuth(c *gin.Context) {
 		// })
 		return
 	}
-	refreshToken, err := pkg.CreateToken(userExist.Ghusername, userExist.Email, "refresh_token")
+	refreshToken, err := pkg.CreateToken(userExist.Ghusername.String, userExist.Email, "refresh_token")
 	if err != nil {
 		cmd.Log.Error(
 			fmt.Sprintf("Failed to create token at %s %s", c.Request.Method, c.FullPath()),
@@ -151,7 +188,7 @@ func CompleteGitHubOAuth(c *gin.Context) {
 		frontendURL,
 		accessToken,
 		refreshToken,
-		loginUser.Ghusername,
+		loginUser.Ghusername.String,
 		loginUser.Email,
 		loginUser.Bounty,
 	)
