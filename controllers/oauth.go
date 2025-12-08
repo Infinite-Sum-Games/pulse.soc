@@ -237,17 +237,12 @@ func RegenerateToken(c *gin.Context) {
 	}
 
 	validIssuer := claims.Issuer == "api.season-of-code"
-	validSub := claims.Subject == "refresh_token"
-	validAudience := len(claims.Audience) == 1
-	if !validIssuer || !validSub || !validAudience {
-		cmd.Log.Error(
-			fmt.Sprintf("Tampered token sent at %s %s", c.Request.Method, c.FullPath()),
-			err)
-		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-			"message": "Server refused to process the request",
-		})
-		return
-	}
+	validTokenType := claims.TokenType == "refresh_token"
+	if !validIssuer || !validTokenType {
+        cmd.Log.Error(fmt.Sprintf("Tampered token at %s %s", c.Request.Method, c.FullPath()), err)
+        c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"message": "Server refused to process the request"})
+        return
+    }
 
 	// Actual controller
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -262,7 +257,7 @@ func RegenerateToken(c *gin.Context) {
 
 	q := db.New()
 	result, err := q.CheckRefreshTokenQuery(ctx, conn, db.CheckRefreshTokenQueryParams{
-		Email:        claims.ID,
+		Email:        claims.Email,
 		RefreshToken: pgtype.Text{String: tokenString, Valid: true},
 	})
 	if err != nil {
@@ -270,7 +265,7 @@ func RegenerateToken(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := pkg.CreateToken(result.Ghusername, result.Email, "access_token")
+	accessToken, err := pkg.CreateToken(result.Ghusername.String, result.Email, "access_token")
 	if err != nil {
 		cmd.Log.Error(
 			fmt.Sprintf("Could not generate access token at %s %s", c.Request.Method, c.FullPath()),
