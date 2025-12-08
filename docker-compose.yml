@@ -10,7 +10,7 @@ services:
       - "5432:5432"
     restart: on-failure
     volumes:
-      - postgres_data:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql/18/data
 
   # Streaming, Leaderboard and Caching layer
   valkey:
