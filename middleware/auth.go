@@ -40,21 +40,21 @@ func Auth(c *gin.Context) {
 		return
 	}
 
-    validIssuer := claims.Issuer == "api.season-of-code"
-    validTokenType := claims.TokenType == "access_token" || claims.TokenType == "temp_token"
-    validEmail := claims.Email != ""
+	validIssuer := claims.Issuer == "api.season-of-code"
+	validTokenType := claims.TokenType == "access_token" || claims.TokenType == "temp_token"
+	validEmail := claims.Email != ""
 
-    if !validIssuer || !validTokenType || !validEmail {
-        cmd.Log.Warn(fmt.Sprintf("Tampered token detected at %s %s. Issuer: %v, Type: %v, Email: %v",
-            c.Request.Method, c.FullPath(), validIssuer, validTokenType, validEmail))
+	if !validIssuer || !validTokenType || !validEmail {
+		cmd.Log.Warn(fmt.Sprintf("Tampered token detected at %s %s. Issuer: %v, Type: %v, Email: %v",
+			c.Request.Method, c.FullPath(), validIssuer, validTokenType, validEmail))
 
-        c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-            "message": "Server refused to process the request",
-        })
-        return
-    }
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+			"message": "Server refused to process the request",
+		})
+		return
+	}
 
-    c.Set("email", claims.Email)
-    c.Set("username", claims.GhUsername)
-    c.Next()
+	c.Set("email", claims.Email)
+	c.Set("username", claims.GhUsername)
+	c.Next()
 }

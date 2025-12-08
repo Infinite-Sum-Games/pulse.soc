@@ -7,6 +7,7 @@ import (
 	"github.com/IAmRiteshKoushik/pulse/cmd"
 	"github.com/golang-jwt/jwt/v5"
 )
+
 type CustomClaims struct {
 	Email      string `json:"email"`
 	GhUsername string `json:"github_username"`
@@ -33,7 +34,7 @@ func CreateToken(GhUsername, email, tokenType string) (string, error) {
 		GhUsername: GhUsername,
 		TokenType:  tokenType,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:   "api.season-of-code",
+			Issuer:    "api.season-of-code",
 			ExpiresAt: jwt.NewNumericDate(expiryAt),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
