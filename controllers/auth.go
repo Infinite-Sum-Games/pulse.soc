@@ -256,8 +256,15 @@ func LoginUser(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	conn, err := cmd.DBPool.Acquire(ctx)
+	if err != nil {
+		pkg.DbError(c, err)
+		return
+	}
+	defer conn.Release()
+
 	q := db.New()
-	user, err := q.GetUserByEmail(ctx, cmd.DBPool, body.Email)
+	user, err := q.GetUserByEmail(ctx, conn, body.Email)
 	if err != nil {
 		cmd.Log.Warn(fmt.Sprintf("Login failed: Email %s not found or DB error: %v", body.Email, err))
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid email or password"})
