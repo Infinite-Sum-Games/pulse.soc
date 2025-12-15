@@ -243,7 +243,6 @@ func RegisterUserOtpResend(c *gin.Context) {
 }
 
 func LoginUser(c *gin.Context) {
-	fmt.Println("LoginUser called")
 	var body types.LoginUserRequest
 	if err := c.BindJSON(&body); err != nil {
 		pkg.JSONUnmarshallError(c, err)
@@ -278,9 +277,17 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
+	refreshToken, err := pkg.CreateToken("", user.Email, "refresh_token")
+	if err != nil {
+		cmd.Log.Error(fmt.Sprintf("Failed to generate refresh token for %s", user.Email), err)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"message":    "Login successful",
-		"access_key": accessToken,
+		"accessToken": accessToken,
+		"refreshToken": refreshToken,
 	})
 
 	cmd.Log.Info(fmt.Sprintf("[SUCCESS]: User logged in: %s", user.Email))
