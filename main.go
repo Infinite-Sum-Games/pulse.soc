@@ -107,9 +107,10 @@ func StartApp() {
 
 	v1.GET("/auth/github", c.InitiateGitHubOAuth)
 	v1.GET("/auth/github/callback", c.CompleteGitHubOAuth)
-	v1.POST("/auth/register", c.RegisterUserAccount)
-	v1.POST("/auth/register/otp/verify", mw.Auth, c.RegisterUserOtpVerify)
-	v1.GET("/auth/register/otp/resend", mw.Auth, c.RegisterUserOtpResend)
+	// v1.POST("/auth/register", c.RegisterUserAccount)
+	v1.POST("/auth/login", c.LoginUser)
+	// v1.POST("/auth/register/otp/verify", mw.Auth, c.RegisterUserOtpVerify)
+	// v1.GET("/auth/register/otp/resend", mw.Auth, c.RegisterUserOtpResend)
 	v1.GET("/auth/refresh", c.RegenerateToken)
 
 	v1.GET("/profile", mw.Auth, c.FetchUserAccount)
@@ -121,6 +122,8 @@ func StartApp() {
 	v1.GET("/updates/latest", c.FetchLatestUpdates)
 	v1.GET("/updates/live", c.SetupLiveUpdates)
 	v1.GET("/hof", c.FetchHallOfFame)
+
+	v1.POST("/webhook", c.WebhookHandler)
 
 	port := strconv.Itoa(cmd.AppConfig.Port)
 	cmd.Log.Info("[ACTIVE]: Server configured and starting on PORT " + port)

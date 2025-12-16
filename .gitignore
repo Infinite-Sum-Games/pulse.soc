@@ -1,13 +1,11 @@
 # Ignore binaries
 tmp/
 bin/
+pulse
 
 # Ignoring environment variables
 config.toml
 config.toml.prod
-
-# Ignoring generated files
-db/gen
 
 # Ignoring RSA and log files
 *.log

@@ -76,15 +76,21 @@ RETURNING
   first_name, middle_name, last_name, email, ghUsername;
 
 -- name: CreateUserAccountQuery :one
-INSERT INTO
-  user_account
-  (
+INSERT INTO user_account (
     first_name,
-    middle_name,
     last_name,
     email,
-    ghUsername
-  )
-VALUES ($1, $2, $3, $4, $5)
-RETURNING
-  ghUsername;
+    password
+) VALUES (
+    $1, $2, $3, $4
+) RETURNING first_name, last_name, email;
+
+-- name: GetUserByEmail :one
+SELECT id, email, password 
+FROM user_account 
+WHERE email = $1 LIMIT 1;
+
+-- name: UpdateUserGithubUsername :exec
+UPDATE user_account 
+SET ghUsername = $1, updated_at = NOW() 
+WHERE email = $2;

@@ -109,3 +109,18 @@ func (r *RegisterUserOtpVerifyRequest) Validate() error {
 		v.Field(&r.Otp, v.Required, v.Length(6, 6), is.Digit),
 	)
 }
+
+type LoginUserRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func (r *LoginUserRequest) Validate() error {
+	r.Email = strings.TrimSpace(r.Email)
+	r.Password = strings.TrimSpace(r.Password)
+
+	return v.ValidateStruct(r,
+		v.Field(&r.Email, v.Required, is.EmailFormat),
+		v.Field(&r.Password, v.Required, v.Length(8, 130)),
+	)
+}

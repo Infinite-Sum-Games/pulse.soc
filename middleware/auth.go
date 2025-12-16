@@ -41,19 +41,35 @@ func Auth(c *gin.Context) {
 	}
 
 	validIssuer := claims.Issuer == "api.season-of-code"
-	validSub := claims.Subject == "access_token" || claims.Subject == "temp_token"
-	validAudience := len(claims.Audience) == 1
-	if !validIssuer || !validSub || !validAudience {
-		cmd.Log.Error(
-			fmt.Sprintf("Tampered token sent at %s %s", c.Request.Method, c.FullPath()),
-			err)
+	validTokenType := claims.TokenType == "access_token" || claims.TokenType == "temp_token"
+	validEmail := claims.Email != ""
+	validGithub := claims.GhUsername != ""
+
+	if !validIssuer || !validTokenType || !validEmail {
+		cmd.Log.Warn(fmt.Sprintf("Tampered token detected at %s %s. Issuer: %v, Type: %v, Email: %v",
+			c.Request.Method, c.FullPath(), validIssuer, validTokenType, validEmail))
+
 		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
 			"message": "Server refused to process the request",
 		})
 		return
 	}
 
-	c.Set("email", claims.ID)
-	c.Set("username", claims.Audience[0])
+	// Case where GitHub has not yet been send but other requests have been made
+	if !validGithub {
+		cmd.Log.Warn(
+			fmt.Sprintf("User with incomplete profile attempting to use %s %s",
+				c.Request.Method,
+				c.FullPath(),
+			),
+		)
+		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{
+			"message": "Please link github before proceeding",
+		})
+		return
+	}
+
+	c.Set("email", claims.Email)
+	c.Set("username", claims.GhUsername)
 	c.Next()
 }

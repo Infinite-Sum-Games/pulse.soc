@@ -1,7 +1,7 @@
 services:
   # Primary database
   postgres:
-    image: postgres:latest
+    image: postgres:17-alpine
     container_name: pulse-postgres
     environment:
       POSTGRES_USER: postgres
@@ -9,8 +9,36 @@ services:
     ports:
       - "5432:5432"
     restart: on-failure
+    networks:
+      - app_network
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+      
+  drizzle-gate:
+    image: ghcr.io/drizzle-team/gateway:latest
+    container_name: pulse-drizzle-gateway
+    environment:
+      DATABASE_URL: postgresql://postgres:1234@postgres:5432/postgres
+      STORE_PATH: /app
+    restart: on-failure
+    depends_on:
+      - postgres
+    ports:
+      - "4983:4983"
+    volumes:
+      - drizzle_gateway_data:/app
+    networks:
+      - app_network
 
   # Streaming, Leaderboard and Caching layer
   valkey:
@@ -41,9 +69,12 @@ services:
       - valkey_network
 
 networks:
+  app_network:
+    driver: bridge
   valkey_network:
     driver: bridge
 
 volumes:
   postgres_data:
   valkey_data:
+  drizzle_gateway_data:

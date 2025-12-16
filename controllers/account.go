@@ -10,34 +10,25 @@ import (
 	db "github.com/IAmRiteshKoushik/pulse/db/gen"
 	"github.com/IAmRiteshKoushik/pulse/pkg"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/redis/go-redis/v9"
 )
 
 func FetchUserAccount(c *gin.Context) {
-	username, ok := c.GetQuery("user")
+	username, ok := pkg.GrabUsername(c)
 	if !ok {
 		cmd.Log.Warn(
-			fmt.Sprintf("`user` query parameter missing in %s %s", c.Request.Method, c.FullPath()),
+			fmt.Sprintf(
+				"Username did not set in Gin-Context post Authentication at %s %s",
+				c.Request.Method,
+				c.FullPath(),
+			),
 		)
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "The request is malformed",
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Oops! Something happened. Please try again later.",
 		})
 		return
 	}
-	// username, ok := pkg.GrabUsername(c)
-	// if !ok {
-	// 	cmd.Log.Warn(
-	// 		fmt.Sprintf(
-	// 			"Username did not set in Gin-Context post Authentication at %s %s",
-	// 			c.Request.Method,
-	// 			c.FullPath(),
-	// 		),
-	// 	)
-	// 	c.JSON(http.StatusInternalServerError, gin.H{
-	// 		"message": "Oops! Something happened. Please try again later.",
-	// 	})
-	// 	return
-	// }
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -50,7 +41,7 @@ func FetchUserAccount(c *gin.Context) {
 	defer conn.Release()
 
 	q := db.New()
-	user, err := q.FetchProfileQuery(ctx, conn, username)
+	user, err := q.FetchProfileQuery(ctx, conn, pgtype.Text{String: username, Valid: true})
 	if err != nil {
 		pkg.DbError(c, err)
 		return
