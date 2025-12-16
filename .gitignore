@@ -1,6 +1,7 @@
 # Ignore binaries
 tmp/
 bin/
+pulse
 
 # Ignoring environment variables
 config.toml

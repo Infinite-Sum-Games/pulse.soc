@@ -123,6 +123,8 @@ func StartApp() {
 	v1.GET("/updates/live", c.SetupLiveUpdates)
 	v1.GET("/hof", c.FetchHallOfFame)
 
+	v1.POST("/webhook", c.WebhookHandler)
+
 	port := strconv.Itoa(cmd.AppConfig.Port)
 	cmd.Log.Info("[ACTIVE]: Server configured and starting on PORT " + port)
 	err = router.Run(":" + port)
