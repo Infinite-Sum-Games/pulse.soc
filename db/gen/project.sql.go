@@ -46,11 +46,12 @@ SELECT
   ) AS claimants
 FROM issues i
 LEFT JOIN
-  issue_claims AS c 
-  ON c.issue_url = i.url
+  issue_claims AS c ON c.issue_url = i.url
+JOIN
+  repository r ON i.repoUrl = r.url
 WHERE 
   i.resolved = false
-  AND i.id = $1
+  AND r.id = $1
 GROUP BY
   i.id, 
   i.title, 
