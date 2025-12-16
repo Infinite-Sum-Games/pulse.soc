@@ -1,0 +1,23 @@
+meta {
+  name: LoginUser
+  type: http
+  seq: 14
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "cb.en.u4cse22038@cb.students.amrita.edu",
+    "password": "ff7bd97b1a7789ddd2775122fd6817f3173672da9f802ceec57f284325bf589f"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
