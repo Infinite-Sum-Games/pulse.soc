@@ -105,7 +105,7 @@ func StartApp() {
 
 	v1 := router.Group("/api/v1")
 
-	v1.GET("/auth/github", c.InitiateGitHubOAuth)
+	v1.GET("/github", mw.Auth, c.InitiateGitHubOAuth)
 	v1.GET("/auth/github/callback", c.CompleteGitHubOAuth)
 	// v1.POST("/auth/register", c.RegisterUserAccount)
 	v1.POST("/auth/login", c.LoginUser)
