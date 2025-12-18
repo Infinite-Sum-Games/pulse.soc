@@ -17,12 +17,12 @@ import (
 )
 
 func InitiateGitHubOAuth(c *gin.Context) {
-	emailVal, ok := c.Get("email")
-	if !ok {
+	email := c.GetString("email")
+	if email == "" {
+		cmd.Log.Warn("Failed to email from context")
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "You must be logged in to link your GitHub account."})
 		return
 	}
-	email := emailVal.(string)
 
 	stateToken, err := pkg.CreateToken("", email, "temp_token")
 	if err != nil {
@@ -32,7 +32,10 @@ func InitiateGitHubOAuth(c *gin.Context) {
 	}
 
 	url := cmd.GithubOAuthConfig.AuthCodeURL(stateToken)
-	c.Redirect(http.StatusTemporaryRedirect, url)
+
+	c.JSON(http.StatusOK, gin.H{
+		"url": url,
+	})
 
 	cmd.Log.Info(fmt.Sprintf("Initiated GitHub Link for %s", email))
 }
