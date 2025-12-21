@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/IAmRiteshKoushik/pulse/cmd"
 	"github.com/IAmRiteshKoushik/pulse/pkg"
@@ -54,9 +55,11 @@ func Auth(c *gin.Context) {
 		})
 		return
 	}
+	// Allowing the GitHub linking endpoint even if the user has no Github Username yet
+	// Check if the request path contains "/github"
+	isLinkingEndpoint := strings.Contains(c.Request.URL.Path, "/github")
 
-	// Case where GitHub has not yet been send but other requests have been made
-	if !validGithub {
+	if !validGithub && !isLinkingEndpoint {
 		cmd.Log.Warn(
 			fmt.Sprintf("User with incomplete profile attempting to use %s %s",
 				c.Request.Method,
