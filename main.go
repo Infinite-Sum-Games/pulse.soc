@@ -103,7 +103,7 @@ func StartApp() {
 		))
 	})
 
-	v1 := router.Group("/api/v1")
+	v1 := router.Group("/woc/api/v1")
 
 	v1.GET("/github", mw.Auth, c.InitiateGitHubOAuth)
 	v1.GET("/auth/github/callback", c.CompleteGitHubOAuth)
